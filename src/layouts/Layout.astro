@@ -5,12 +5,22 @@ import Preloader from '../components/Preloader.astro';
 interface Props {
   title: string;
   description?: string;
+  ogImage?: string;
+  canonicalUrl?: string;
 }
+
+const SITE_URL = 'https://vizorpeliculas.com.br';
 
 const {
   title,
-  description = 'Vizor Películas Protetoras — Fabricante nacional de películas para painéis de motocicletas. Mais de 200 modelos. Acabamento Brilho e Fosco.'
+  description = 'Fabricante nacional de películas protetoras para painéis de instrumentos de motocicletas. Mais de 200 modelos em acabamento Brilho e Fosco. Honda, Yamaha, Kawasaki, BMW e muito mais. São Leopoldo, RS.',
+  ogImage = `${SITE_URL}/og-image.png`,
+  canonicalUrl = SITE_URL,
 } = Astro.props;
+
+const fullTitle = title === 'Vizor Películas Protetoras'
+  ? title
+  : `${title} | Vizor Películas Protetoras`;
 ---
 
 <!doctype html>
@@ -18,16 +28,39 @@ const {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content={description} />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="generator" content={Astro.generator} />
-    <title>{title} | Vizor Películas Protetoras</title>
 
-    <!-- Open Graph -->
-    <meta property="og:title" content={`${title} | Vizor Películas Protetoras`} />
-    <meta property="og:description" content={description} />
+    <!-- SEO básico -->
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="keywords" content="película protetora moto, película painel moto, proteção painel motocicleta, película honda, película yamaha, película kawasaki, película BMW moto, vizor películas, São Leopoldo RS" />
+    <meta name="author" content="Vizor Películas Protetoras" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href={canonicalUrl} />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- Open Graph (Facebook, WhatsApp, LinkedIn) -->
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Vizor Películas Protetoras" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Vizor Películas Protetoras — Fabricante nacional de películas para motos" />
     <meta property="og:locale" content="pt_BR" />
+
+    <!-- Twitter Card (também usado pelo X/Twitter) -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content="Vizor Películas Protetoras — Fabricante nacional de películas para motos" />
 
     <!-- CSS crítico inline: renderiza fundo, cores e layout base antes de qualquer arquivo externo -->
     <style is:inline>
