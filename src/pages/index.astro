@@ -1,10 +1,385 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+import Hero from '../components/Hero.astro';
+import ProductFinder from '../components/ProductFinder.astro';
+import BrandGrid from '../components/BrandGrid.astro';
+import FeaturedProducts from '../components/FeaturedProducts.astro';
+import Diferenciais from '../components/Diferenciais.astro';
+import Tecnologia from '../components/Tecnologia.astro';
+import Manifesto from '../components/Manifesto.astro';
+import Revendedor from '../components/Revendedor.astro';
+import Footer from '../components/Footer.astro';
 ---
 
-<Layout title="Home">
-  <main class="min-h-screen flex flex-col items-center justify-center px-4">
-    <h1 class="text-5xl font-bold text-white mb-4">Vizor Películas</h1>
-    <p class="text-xl text-gray-400">Em construção...</p>
-  </main>
+<Layout
+  title="Vizor Películas Protetoras"
+  description="Fabricante nacional de películas protetoras para painéis de instrumentos de motocicletas. Mais de 200 modelos em acabamento Brilho e Fosco. São Leopoldo, RS."
+>
+  <!-- Navigation -->
+  <Navbar />
+
+  <!-- 01 · Hero -->
+  <Hero />
+
+  <!-- 02 · Product Finder -->
+  <ProductFinder />
+
+  <!-- 03 · Featured Products -->
+  <FeaturedProducts />
+
+  <!-- 04 · Brand Grid -->
+  <BrandGrid />
+
+  <!-- 05 · Diferenciais -->
+  <Diferenciais />
+
+  <!-- 06 · Tecnologia -->
+  <Tecnologia />
+
+  <!-- 07 · Manifesto / Sobre -->
+  <Manifesto />
+
+  <!-- 08 · Seja Revendedor -->
+  <Revendedor />
+
+  <!-- 09 · Footer -->
+  <Footer />
+
+  <!-- GSAP Animations -->
+  <script is:inline>
+    function initPageAnimations() {
+      // Garante que GSAP e ScrollTrigger estão disponíveis
+      if (typeof gsap === 'undefined') return;
+
+      gsap.registerPlugin(ScrollTrigger);
+
+      // ── Utilitário: tornar visível antes de animar ──────────────────
+      function reveal(targets) {
+        gsap.set(targets, { visibility: 'visible' });
+      }
+
+      // ══════════════════════════════════════════════════════════════
+      // 1. NAVBAR — slide down + fade
+      // ══════════════════════════════════════════════════════════════
+      const navbar = document.getElementById('navbar');
+      if (navbar) {
+        gsap.fromTo(navbar,
+          { y: -80, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.7, ease: 'power3.out', delay: 0.1 }
+        );
+      }
+
+      // ══════════════════════════════════════════════════════════════
+      // 2. HERO — sequência cinematográfica
+      // ══════════════════════════════════════════════════════════════
+      const heroTag      = document.getElementById('hero-tag');
+      const heroHeadline = document.getElementById('hero-headline');
+      const heroSub      = document.getElementById('hero-sub');
+      const heroActions  = document.getElementById('hero-actions');
+      const heroFooter   = document.getElementById('hero-footer');
+
+      const heroEls = [heroTag, heroHeadline, heroSub, heroActions, heroFooter].filter(Boolean);
+      reveal(heroEls);
+
+      const heroTl = gsap.timeline({ delay: 0.15 });
+
+      if (heroTag) {
+        const tagLine = heroTag.querySelector('.hero__tag-line');
+        heroTl.fromTo(heroTag,
+          { opacity: 0, x: -20 },
+          { opacity: 1, x: 0, duration: 0.5, ease: 'power2.out' }
+        );
+        if (tagLine) {
+          gsap.set(tagLine, { scaleX: 0, transformOrigin: 'left center' });
+          heroTl.to(tagLine, { scaleX: 1, duration: 0.4, ease: 'power2.inOut' }, '<');
+        }
+      }
+
+      if (heroHeadline) {
+        heroTl.fromTo(heroHeadline,
+          { opacity: 0, y: 32 },
+          { opacity: 1, y: 0, duration: 0.75, ease: 'power4.out' },
+          '-=0.1'
+        );
+      }
+
+      if (heroSub) {
+        heroTl.fromTo(heroSub,
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 0.55, ease: 'power2.out' },
+          '-=0.35'
+        );
+      }
+
+      if (heroActions) {
+        const btns = heroActions.querySelectorAll('a');
+        heroTl.fromTo(btns.length ? btns : [heroActions],
+          { opacity: 0, y: 16, scale: 0.97 },
+          { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: 'back.out(1.4)', stagger: 0.12 },
+          '-=0.25'
+        );
+      }
+
+      if (heroFooter) {
+        heroTl.fromTo(heroFooter,
+          { opacity: 0, y: 10 },
+          { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' },
+          '-=0.2'
+        );
+      }
+
+      // ══════════════════════════════════════════════════════════════
+      // 3. SCROLL REVEAL — substitui IntersectionObserver
+      //    Alvo: .vz-reveal   (seções genéricas)
+      // ══════════════════════════════════════════════════════════════
+      gsap.utils.toArray('.vz-reveal').forEach((el) => {
+        gsap.fromTo(
+          el,
+          { opacity: 0, y: 28 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.65,
+            ease: 'power2.out',
+            scrollTrigger: {
+              trigger: el,
+              start: 'top 88%',
+              once: true,
+            },
+          }
+        );
+      });
+
+      // ══════════════════════════════════════════════════════════════
+      // 4. SEÇÕES — headers das seções (overline + título + sub)
+      // ══════════════════════════════════════════════════════════════
+      gsap.utils.toArray('.vz-overline, .vz-display-l, .vz-display-m').forEach((el) => {
+        gsap.fromTo(
+          el,
+          { opacity: 0, y: 24 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            ease: 'power2.out',
+            scrollTrigger: {
+              trigger: el,
+              start: 'top 90%',
+              once: true,
+            },
+          }
+        );
+      });
+
+      // ══════════════════════════════════════════════════════════════
+      // 5. CARDS com stagger — Diferenciais, FeaturedProducts, etc.
+      // ══════════════════════════════════════════════════════════════
+      // Diferenciais cards
+      const difCards = gsap.utils.toArray('.diferenciais__card');
+      if (difCards.length) {
+        gsap.fromTo(
+          difCards,
+          { opacity: 0, y: 40, scale: 0.97 },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 0.55,
+            ease: 'power2.out',
+            stagger: 0.1,
+            scrollTrigger: {
+              trigger: '.diferenciais__grid',
+              start: 'top 85%',
+              once: true,
+            },
+          }
+        );
+      }
+
+      // Catalog cards (FeaturedProducts)
+      const catCards = gsap.utils.toArray('.cat-card');
+      if (catCards.length) {
+        gsap.fromTo(
+          catCards,
+          { opacity: 0, y: 32 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.5,
+            ease: 'power2.out',
+            stagger: { amount: 0.5, from: 'start' },
+            scrollTrigger: {
+              trigger: '.featured__grid',
+              start: 'top 85%',
+              once: true,
+            },
+          }
+        );
+      }
+
+      // Brand cards
+      const brandCards = gsap.utils.toArray('.vz-brand-card');
+      if (brandCards.length) {
+        gsap.fromTo(
+          brandCards,
+          { opacity: 0, scale: 0.9, y: 20 },
+          {
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            duration: 0.45,
+            ease: 'back.out(1.3)',
+            stagger: { amount: 0.6, from: 'start' },
+            scrollTrigger: {
+              trigger: brandCards[0].closest('section') || brandCards[0],
+              start: 'top 85%',
+              once: true,
+            },
+          }
+        );
+      }
+
+      // ══════════════════════════════════════════════════════════════
+      // 6. MANIFESTO — quote reveal + right column
+      // ══════════════════════════════════════════════════════════════
+      const manifestoLeft  = document.querySelector('.manifesto__left');
+      const manifestoRight = document.querySelector('.manifesto__right');
+      const manifestoSection = document.querySelector('.manifesto');
+
+      if (manifestoLeft && manifestoSection) {
+        gsap.fromTo(
+          manifestoLeft,
+          { opacity: 0, x: -40 },
+          {
+            opacity: 1,
+            x: 0,
+            duration: 0.75,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: manifestoSection,
+              start: 'top 80%',
+              once: true,
+            },
+          }
+        );
+      }
+
+      if (manifestoRight && manifestoSection) {
+        gsap.fromTo(
+          manifestoRight,
+          { opacity: 0, x: 40 },
+          {
+            opacity: 1,
+            x: 0,
+            duration: 0.75,
+            ease: 'power3.out',
+            delay: 0.15,
+            scrollTrigger: {
+              trigger: manifestoSection,
+              start: 'top 80%',
+              once: true,
+            },
+          }
+        );
+      }
+
+      // Manifesto info cards stagger
+      const manifestoCards = gsap.utils.toArray('.manifesto__card');
+      if (manifestoCards.length) {
+        gsap.fromTo(
+          manifestoCards,
+          { opacity: 0, y: 20 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.45,
+            ease: 'power2.out',
+            stagger: 0.09,
+            scrollTrigger: {
+              trigger: '.manifesto__cards',
+              start: 'top 88%',
+              once: true,
+            },
+          }
+        );
+      }
+
+      // ══════════════════════════════════════════════════════════════
+      // 7. REVENDEDOR / CTA section
+      // ══════════════════════════════════════════════════════════════
+      const revendedorSection = document.getElementById('revendedor') || document.querySelector('.revendedor');
+      if (revendedorSection) {
+        gsap.fromTo(
+          revendedorSection.querySelectorAll('h2, p, a, .vz-overline'),
+          { opacity: 0, y: 30 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.55,
+            ease: 'power2.out',
+            stagger: 0.1,
+            scrollTrigger: {
+              trigger: revendedorSection,
+              start: 'top 82%',
+              once: true,
+            },
+          }
+        );
+      }
+
+      // ══════════════════════════════════════════════════════════════
+      // 8. FOOTER — fade in
+      // ══════════════════════════════════════════════════════════════
+      const footer = document.querySelector('footer');
+      if (footer) {
+        gsap.fromTo(
+          footer,
+          { opacity: 0 },
+          {
+            opacity: 1,
+            duration: 0.6,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: footer,
+              start: 'top 95%',
+              once: true,
+            },
+          }
+        );
+      }
+
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      var animated = false;
+      function runOnce() {
+        if (animated) return;
+        animated = true;
+        initPageAnimations();
+      }
+
+      document.addEventListener('vz:preloader-done', runOnce, { once: true });
+      setTimeout(runOnce, 5000);
+    });
+  </script>
 </Layout>
+
+<style is:global>
+  /* Scroll reveal utility — mantido como fallback */
+  .vz-reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .vz-reveal.vz-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Smooth anchor scroll offset for fixed navbar */
+  :target {
+    scroll-margin-top: 88px;
+  }
+</style>

@@ -1,0 +1,262 @@
+---
+// Hero — Vizor Películas Protetoras
+---
+<section class="hero">
+
+  <!-- Conteúdo -->
+  <div class="hero__body">
+    <div class="vz-container hero__container">
+      <div class="hero__content">
+
+        <p class="hero__tag gsap-init" id="hero-tag">
+          <span class="hero__tag-line" aria-hidden="true"></span>
+          Catálogo de produtos 2025
+        </p>
+
+        <h1 class="hero__headline gsap-init" id="hero-headline">
+          PROTEÇÃO QUE<br />
+          COMBINA COM<br />
+          SUA <span class="hero__headline-blue">PAIXÃO</span>
+        </h1>
+
+        <p class="hero__sub gsap-init" id="hero-sub">
+          Películas protetoras para painéis de instrumentos —
+          disponíveis em <strong>Brilho</strong> e <strong>Fosco</strong>
+          para mais de <strong>200&nbsp;modelos</strong> de motocicletas.
+        </p>
+
+        <div class="hero__actions gsap-init" id="hero-actions">
+          <a href="#buscador" class="hero__btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Encontre para sua moto
+          </a>
+          <a href="#marcas" class="hero__btn-outline">Ver catálogo completo</a>
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Barra inferior -->
+  <div class="hero__footer gsap-init" id="hero-footer">
+    <div class="vz-container hero__footer-inner">
+      <span class="hero__footer-left">
+        <span class="hero__footer-dot" aria-hidden="true"></span>
+        Fabricação Nacional · São Leopoldo, RS
+      </span>
+      <span class="hero__footer-right">VIZOR · PELÍCULAS PROTETORAS</span>
+    </div>
+  </div>
+
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    /* Foto de moto via background-image — sem CORS */
+    background-image:
+      linear-gradient(
+        105deg,
+        rgba(2, 26, 45, 0.95) 0%,
+        rgba(10, 46, 74, 0.90) 40%,
+        rgba(10, 46, 74, 0.70) 70%,
+        rgba(10, 46, 74, 0.50) 100%
+      ),
+      url('/bg.png');
+    background-size: cover;
+    background-position: center 35%;
+    background-repeat: no-repeat;
+  }
+
+  /* ── Body ── ocupa o espaço entre navbar (68px) e footer bar */
+  .hero__body {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding-top: 68px; /* compensa a navbar fixa */
+    min-height: 0;     /* permite shrink no flex */
+  }
+
+  .hero__container {
+    padding-top: 40px;
+    padding-bottom: 40px;
+  }
+
+  /* limita o bloco de texto à esquerda dentro do container */
+  .hero__content {
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* espaçamentos individuais entre blocos */
+  .hero__tag    { margin-bottom: 16px; }
+  .hero__headline { margin-bottom: 20px; }
+  .hero__sub    { margin-bottom: 28px; }
+  .hero__actions { margin-bottom: 28px; }
+
+  /* ── Overline ── */
+  .hero__tag {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    color: #5BAEE0;
+    text-transform: uppercase;
+  }
+
+  .hero__tag-line {
+    display: block;
+    width: 44px;
+    height: 2px;
+    background: #2E8BC7;
+    flex-shrink: 0;
+  }
+
+  /* ── Headline ── */
+  .hero__headline {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: clamp(52px, 6.5vw, 88px);
+    line-height: 0.92;
+    letter-spacing: -0.01em;
+    color: #fff;
+    text-transform: uppercase;
+    text-shadow: 0 2px 24px rgba(0,0,0,0.4);
+  }
+
+  .hero__headline-blue { color: #5BAEE0; }
+
+  /* ── Sub ── */
+  .hero__sub {
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.65);
+    max-width: 460px;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.5);
+  }
+
+  .hero__sub strong {
+    color: rgba(255,255,255,0.92);
+    font-weight: 600;
+  }
+
+  /* ── CTAs ── */
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .hero__btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #1A5C8A;
+    color: #fff;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 15px;
+    padding: 14px 26px;
+    border-radius: 3px;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+  .hero__btn-primary:hover { background: #2172A8; }
+
+  .hero__btn-outline {
+    display: inline-flex;
+    align-items: center;
+    background: transparent;
+    color: rgba(255,255,255,0.78);
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 15px;
+    padding: 13px 25px;
+    border-radius: 3px;
+    text-decoration: none;
+    border: 1.5px solid rgba(255,255,255,0.25);
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .hero__btn-outline:hover {
+    color: #fff;
+    border-color: rgba(255,255,255,0.55);
+  }
+
+
+  /* ── Footer bar ── */
+  .hero__footer {
+    position: relative;
+    z-index: 1;
+    background: rgba(2,26,45,0.72);
+    border-top: 1px solid rgba(46,139,199,0.2);
+  }
+
+  .hero__footer-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 13px;
+    padding-bottom: 13px;
+  }
+
+  .hero__footer-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-body);
+    font-size: 12px;
+    color: rgba(255,255,255,0.38);
+    letter-spacing: 0.06em;
+  }
+
+  .hero__footer-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #2E8BC7;
+    flex-shrink: 0;
+    animation: blink 2.5s ease-in-out infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.3; }
+  }
+
+  .hero__footer-right {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: rgba(255,255,255,0.20);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .hero__container { padding-top: 24px; padding-bottom: 24px; }
+  }
+
+  @media (max-width: 600px) {
+    .hero__headline  { font-size: clamp(40px, 11vw, 64px); }
+    .hero__footer-right { display: none; }
+    .hero__container { padding-top: 16px; padding-bottom: 16px; }
+    .hero__stats     { gap: 16px; }
+    .hero__tag       { margin-bottom: 12px; }
+    .hero__headline  { margin-bottom: 14px; }
+    .hero__sub       { margin-bottom: 20px; font-size: 14.5px; }
+    .hero__actions   { margin-bottom: 20px; }
+  }
+</style>

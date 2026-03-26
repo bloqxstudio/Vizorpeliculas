@@ -1,0 +1,246 @@
+---
+// Diferenciais — 4 blocos de valor
+const items = [
+  {
+    icon: 'flag',
+    title: 'Fabricação Nacional',
+    text: 'Produzido em São Leopoldo, RS. Controle total do processo produtivo, do insumo ao produto acabado.',
+    accent: '#1A5C8A',
+  },
+  {
+    icon: 'shield',
+    title: 'Qualidade Técnica',
+    text: 'Especificações alinhadas às principais montadoras. Sistema de Gestão da Qualidade (SGQ) ativo em toda produção.',
+    accent: '#2172A8',
+  },
+  {
+    icon: 'layers',
+    title: 'Brilho ou Fosco',
+    text: 'Dois acabamentos para cada modelo. Escolha entre o acabamento glossy (Brilho) ou matte (Fosco) — o que combina com o seu estilo.',
+    accent: '#2E8BC7',
+  },
+  {
+    icon: 'grid',
+    title: '+200 Modelos',
+    text: 'O maior catálogo de películas para painéis de motos do Brasil. 17 marcas, de populares a importadas premium.',
+    accent: '#5BAEE0',
+  },
+];
+
+// SVG icons as strings
+const icons: Record<string, string> = {
+  flag: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+    <line x1="4" y1="22" x2="4" y2="15"/>
+  </svg>`,
+  shield: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    <polyline points="9 12 11 14 15 10"/>
+  </svg>`,
+  layers: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+    <polyline points="2 17 12 22 22 17"/>
+    <polyline points="2 12 12 17 22 12"/>
+  </svg>`,
+  grid: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+    <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+  </svg>`,
+};
+---
+
+<section class="diferenciais" aria-labelledby="diferenciais-title">
+  <!-- Top wave shape -->
+  <div class="diferenciais__wave" aria-hidden="true">
+    <svg viewBox="0 0 1440 64" preserveAspectRatio="none" fill="none">
+      <path d="M0 64 L0 32 Q360 0 720 32 Q1080 64 1440 32 L1440 64 Z" fill="var(--vz-800)"/>
+    </svg>
+  </div>
+
+  <div class="vz-container diferenciais__inner">
+
+    <!-- Header -->
+    <div class="diferenciais__header">
+      <p class="vz-overline" style="color: var(--vz-300);">Por que Vizor</p>
+      <h2 id="diferenciais-title" class="vz-display-m diferenciais__title">
+        Fabricante. <span class="diferenciais__title-accent">Não loja.</span>
+      </h2>
+      <p class="diferenciais__sub">
+        Cada película sai diretamente da nossa fábrica para o seu painel.
+      </p>
+    </div>
+
+    <!-- Cards grid -->
+    <div class="diferenciais__grid">
+      {items.map((item, i) => (
+        <div class="diferenciais__card" style={`--accent: ${item.accent}; animation-delay: ${i * 0.1}s`}>
+          <!-- Icon -->
+          <div class="diferenciais__icon" aria-hidden="true" set:html={icons[item.icon]}></div>
+
+          <!-- Number -->
+          <span class="diferenciais__num" aria-hidden="true">0{i + 1}</span>
+
+          <!-- Content -->
+          <h3 class="diferenciais__card-title">{item.title}</h3>
+          <p class="diferenciais__card-text">{item.text}</p>
+
+          <!-- Bottom accent line -->
+          <div class="diferenciais__card-line" aria-hidden="true"></div>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <!-- Bottom wave -->
+  <div class="diferenciais__wave diferenciais__wave--bottom" aria-hidden="true">
+    <svg viewBox="0 0 1440 64" preserveAspectRatio="none" fill="none">
+      <path d="M0 0 L0 32 Q360 64 720 32 Q1080 0 1440 32 L1440 0 Z" fill="var(--vz-800)"/>
+    </svg>
+  </div>
+</section>
+
+<style>
+  .diferenciais {
+    background-color: var(--vz-800);
+    position: relative;
+    padding: 80px 0;
+  }
+
+  .diferenciais__wave {
+    width: 100%;
+    height: 64px;
+    margin-top: -1px;
+  }
+
+  .diferenciais__wave--bottom {
+    margin-bottom: -1px;
+  }
+
+  .diferenciais__wave svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .diferenciais__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 56px;
+  }
+
+  .diferenciais__header {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-width: 560px;
+  }
+
+  .diferenciais__title {
+    color: #fff;
+    margin: 0;
+  }
+
+  .diferenciais__title-accent {
+    color: var(--vz-300);
+  }
+
+  .diferenciais__sub {
+    font-size: 16px;
+    color: rgba(255,255,255,0.55);
+    margin: 0;
+  }
+
+  /* Grid */
+  .diferenciais__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+  }
+
+  /* Card */
+  .diferenciais__card {
+    position: relative;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    padding: 32px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    overflow: hidden;
+    transition: background 0.25s, border-color 0.25s, transform 0.25s;
+  }
+
+  .diferenciais__card:hover {
+    background: rgba(255,255,255,0.07);
+    border-color: rgba(var(--accent, #2E8BC7), 0.4);
+    transform: translateY(-3px);
+  }
+
+  .diferenciais__icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent, var(--vz-400));
+    flex-shrink: 0;
+  }
+
+  .diferenciais__num {
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 36px;
+    line-height: 1;
+    color: rgba(255,255,255,0.06);
+    letter-spacing: -0.02em;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .diferenciais__card-title {
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 18px;
+    color: #fff;
+    margin: 4px 0 0;
+    line-height: 1.3;
+  }
+
+  .diferenciais__card-text {
+    font-family: var(--font-body);
+    font-size: 14.5px;
+    line-height: 1.65;
+    color: rgba(255,255,255,0.55);
+    margin: 0;
+  }
+
+  .diferenciais__card-line {
+    height: 2px;
+    width: 36px;
+    background: var(--accent, var(--vz-400));
+    border-radius: 2px;
+    margin-top: auto;
+    opacity: 0.7;
+    transition: width 0.3s ease;
+  }
+
+  .diferenciais__card:hover .diferenciais__card-line {
+    width: 60px;
+    opacity: 1;
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .diferenciais__grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+  }
+</style>

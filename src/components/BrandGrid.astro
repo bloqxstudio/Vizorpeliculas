@@ -1,0 +1,227 @@
+---
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
+
+// BrandGrid — Grade de marcas atendidas
+const brands = [
+  { id: 'bajaj',         name: 'Bajaj',          count: 7,  color: '#E84B1A', logo: 'bajaj.svg',        logoBg: '#fff' },
+  { id: 'bmw',           name: 'BMW',             count: 17, color: '#1C69D4', logo: 'bmw.svg',          logoBg: '#fff' },
+  { id: 'dafra',         name: 'Dafra',           count: 4,  color: '#D4181B', logo: 'dafra.svg',        logoBg: '#fff' },
+  { id: 'ducati',        name: 'Ducati',          count: 6,  color: '#CC0000', logo: 'ducati.svg',       logoBg: '#fff' },
+  { id: 'haojue',        name: 'Haojue',          count: 4,  color: '#005BAC', logo: 'haojue.svg',       logoBg: '#fff' },
+  { id: 'harley',        name: 'Harley-Davidson', count: 4,  color: '#FF6600', logo: 'harley.svg',       logoBg: '#fff' },
+  { id: 'honda',         name: 'Honda',           count: 35, color: '#CC0000', logo: 'honda.svg',        logoBg: '#fff' },
+  { id: 'kawasaki',      name: 'Kawasaki',        count: 24, color: '#1a1a1a', logo: 'kawasaki.svg',     logoBg: '#fff' },
+  { id: 'ktm',           name: 'KTM',             count: 5,  color: '#FF6600', logo: 'ktm.svg',          logoBg: '#1a1a1a' },
+  { id: 'royal_enfield', name: 'Royal Enfield',   count: 11, color: '#8B1A1A', logo: 'royalenfield.svg', logoBg: '#fff' },
+  { id: 'shineray',      name: 'Shineray',        count: 7,  color: '#003087', logo: 'shineray.svg',     logoBg: '#fff' },
+  { id: 'suzuki',        name: 'Suzuki',          count: 12, color: '#0047AB', logo: 'suzuki.svg',       logoBg: '#fff' },
+  { id: 'triumph',       name: 'Triumph',         count: 18, color: '#0066CC', logo: 'triumph.svg',      logoBg: '#fff' },
+  { id: 'voltz',         name: 'Voltz',           count: 2,  color: '#2ECC71', logo: 'voltz.svg',        logoBg: '#fff' },
+  { id: 'yamaha',        name: 'Yamaha',          count: 38, color: '#0E1C96', logo: 'yamaha.svg',       logoBg: '#fff' },
+  { id: 'zontes',        name: 'Zontes',          count: 3,  color: '#E30613', logo: 'zontes.svg',       logoBg: '#fff' },
+];
+
+// Lê e injeta cada SVG inline, aplicando a cor da marca no fill
+function getInlineSvg(filename: string, color: string): string {
+  try {
+    const filePath = resolve('public/logos', filename);
+    let svg = readFileSync(filePath, 'utf-8');
+    // Remove a tag <title> para evitar tooltip no browser
+    svg = svg.replace(/<title>[^<]*<\/title>/g, '');
+    // Injeta fill com a cor da marca no elemento <svg> raiz e no <path>
+    svg = svg.replace('<svg ', `<svg fill="${color}" `);
+    return svg;
+  } catch {
+    return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><text x="12" y="16" text-anchor="middle" font-size="8" fill="${color}">${filename.replace('.svg','').toUpperCase()}</text></svg>`;
+  }
+}
+
+const brandsWithSvg = brands.map(b => ({
+  ...b,
+  svgContent: getInlineSvg(b.logo, b.color),
+}));
+---
+
+<section id="marcas" class="brands" aria-labelledby="brands-title">
+  <div class="vz-container brands__inner">
+
+    <!-- Header -->
+    <div class="brands__header">
+      <p class="vz-overline">Catálogo completo</p>
+      <h2 id="brands-title" class="vz-display-m brands__title">
+        17 marcas. <span class="brands__title-accent">Mais de 200 modelos.</span>
+      </h2>
+      <p class="brands__sub">
+        Do popular ao premium, do nacional ao importado. Encontre sua moto.
+      </p>
+    </div>
+
+    <!-- Grid -->
+    <div class="brands__grid" role="list">
+      {brandsWithSvg.map((brand) => (
+        <a
+          href="#buscador"
+          class="vz-brand-card brands__card"
+          data-brand={brand.id}
+          role="listitem"
+          aria-label={`${brand.name} — ${brand.count} modelos`}
+        >
+          <div
+            class="brands__logo-wrap"
+            style={`--brand-color: ${brand.color}; background: ${brand.logoBg}`}
+            aria-hidden="true"
+            set:html={brand.svgContent}
+          />
+          <span class="brands__name">{brand.name}</span>
+          <span class="brands__count">{brand.count} {brand.count === 1 ? 'modelo' : 'modelos'}</span>
+        </a>
+      ))}
+    </div>
+
+    <!-- Bottom CTA -->
+    <div class="brands__footer">
+      <div class="vz-divider"></div>
+      <p class="brands__footer-text">
+        Não encontrou sua moto?
+        <a href="#buscador" class="brands__footer-link">Use o buscador de compatibilidade →</a>
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .brands {
+    background-color: #fff;
+    padding: var(--section-py) 0;
+    position: relative;
+  }
+
+  .brands__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 52px;
+  }
+
+  .brands__header {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-width: 560px;
+  }
+
+  .brands__title { color: var(--vz-700); margin: 0; }
+  .brands__title-accent { color: var(--vz-600); }
+
+  .brands__sub {
+    font-size: 16px;
+    color: var(--vz-gray-500);
+    margin: 0;
+  }
+
+  /* Grid */
+  .brands__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+  }
+
+  .brands__card { text-align: center; }
+
+  /* Logo wrapper — contém o SVG inline */
+  .brands__logo-wrap {
+    width: 64px;
+    height: 64px;
+    border-radius: 14px;
+    border: 1.5px solid color-mix(in srgb, var(--brand-color) 22%, #e5e7eb);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    transition: box-shadow 0.22s, transform 0.22s, border-color 0.22s;
+  }
+
+  .brands__card:hover .brands__logo-wrap {
+    box-shadow: 0 6px 20px color-mix(in srgb, var(--brand-color) 28%, transparent);
+    border-color: color-mix(in srgb, var(--brand-color) 55%, transparent);
+    transform: scale(1.08);
+  }
+
+  /* O SVG injetado inline */
+  .brands__logo-wrap svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .brands__name {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 13.5px;
+    color: var(--vz-gray-900);
+    line-height: 1.3;
+    text-align: center;
+  }
+
+  .brands__count {
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: 12px;
+    color: var(--vz-gray-500);
+  }
+
+  /* Footer */
+  .brands__footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+  }
+
+  .brands__footer-text {
+    font-size: 15px;
+    color: var(--vz-gray-500);
+    margin: 0;
+  }
+
+  .brands__footer-link {
+    color: var(--vz-600);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .brands__footer-link:hover { color: var(--vz-500); }
+
+  @media (max-width: 600px) {
+    .brands__grid {
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+    }
+    .brands__logo-wrap {
+      width: 54px;
+      height: 54px;
+      padding: 8px;
+      border-radius: 12px;
+    }
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.brands__card[data-brand]').forEach(card => {
+    card.addEventListener('click', (e) => {
+      e.preventDefault();
+      const brandId = card.dataset.brand;
+      if (!brandId) return;
+      const brandSelect = document.getElementById('select-brand') as HTMLSelectElement;
+      if (brandSelect) {
+        brandSelect.value = brandId;
+        brandSelect.dispatchEvent(new Event('change'));
+      }
+      document.getElementById('buscador')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+</script>

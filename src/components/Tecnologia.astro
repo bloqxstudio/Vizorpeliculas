@@ -1,0 +1,229 @@
+---
+// Tecnologia — Seção de processo e fabricação
+const specs = [
+  { label: 'Material', value: 'Filme polimérico de alta resistência' },
+  { label: 'Acabamentos', value: 'Brilho (Glossy) · Fosco (Matte)' },
+  { label: 'Padrão', value: 'Especificações de montadoras' },
+  { label: 'SGQ', value: 'Sistema de Gestão da Qualidade ativo' },
+  { label: 'Origem', value: 'Fabricação 100% nacional' },
+  { label: 'Aplicação', value: 'Painéis de instrumentos (dashboards)' },
+];
+---
+
+<section class="tecno" aria-labelledby="tecno-title">
+  <div class="vz-container tecno__inner">
+
+    <!-- Left: text content -->
+    <div class="tecno__content">
+      <p class="vz-overline">Processo produtivo</p>
+      <h2 id="tecno-title" class="vz-display-l tecno__title">
+        TECNOLOGIA<br />
+        <span class="tecno__title-accent">APLICADA COM</span><br />
+        PROPÓSITO
+      </h2>
+      <div class="vz-divider" style="margin: 8px 0;"></div>
+      <p class="tecno__text">
+        Nossa unidade fabril em São Leopoldo, RS, opera com maquinário moderno de alta capacidade.
+        Cada película passa por rigoroso controle de qualidade antes de sair da fábrica —
+        do corte de precisão ao embalamento final.
+      </p>
+      <p class="tecno__text">
+        O nosso Sistema de Gestão da Qualidade (SGQ) garante rastreabilidade total e
+        conformidade com as especificações técnicas das principais montadoras do mercado.
+        Inovação contínua não é promessa — é processo.
+      </p>
+
+      <!-- Spec list -->
+      <div class="tecno__specs">
+        {specs.map(s => (
+          <div class="tecno__spec">
+            <span class="tecno__spec-label">{s.label}</span>
+            <span class="tecno__spec-value">{s.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <!-- Right: product image -->
+    <div class="tecno__visual">
+      <div class="tecno__panel">
+        <div class="tecno__panel-screen">
+          <img
+            src="/hero-moto.jpg"
+            alt="Película protetora Vizor aplicada em painel de instrumentos de motocicleta"
+            class="tecno__panel-img"
+            loading="lazy"
+          />
+        </div>
+
+        <!-- Película overlay shimmer -->
+        <div class="tecno__panel-film" aria-hidden="true">
+          <div class="tecno__film-badge">
+            <span class="vz-badge-brilho">✦ BRILHO</span>
+          </div>
+        </div>
+
+        <!-- Floating label -->
+        <div class="tecno__panel-label">
+          <span class="vz-mono" style="color: var(--vz-300); font-size: 11px;">VIZOR · PELÍCULAS PROTETORAS</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .tecno {
+    background-color: var(--vz-900);
+    padding: var(--section-py) 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .tecno::before {
+    content: '';
+    position: absolute;
+    top: -200px;
+    right: -200px;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(26,92,138,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .tecno__inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 72px;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .tecno__content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .tecno__title {
+    color: #fff;
+    margin: 0;
+  }
+
+  .tecno__title-accent {
+    color: var(--vz-300);
+  }
+
+  .tecno__text {
+    font-size: 15.5px;
+    line-height: 1.75;
+    color: rgba(255,255,255,0.55);
+    margin: 0;
+  }
+
+  /* Spec list */
+  .tecno__specs {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 8px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .tecno__spec {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .tecno__spec-label {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 12.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--vz-400);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .tecno__spec-value {
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: rgba(255,255,255,0.65);
+    text-align: right;
+  }
+
+  /* Visual */
+  .tecno__visual {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .tecno__panel {
+    position: relative;
+    width: 100%;
+    max-width: 440px;
+  }
+
+  .tecno__panel-screen {
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid rgba(46,139,199,0.25);
+    box-shadow:
+      0 0 0 1px rgba(46,139,199,0.1),
+      0 40px 80px rgba(0,0,0,0.6),
+      inset 0 1px 0 rgba(255,255,255,0.05);
+    position: relative;
+  }
+
+  .tecno__panel-img {
+    width: 100%;
+    display: block;
+    aspect-ratio: 4/3;
+    object-fit: cover;
+  }
+
+  /* Film overlay shimmer */
+  .tecno__panel-film {
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    background: linear-gradient(
+      135deg,
+      rgba(255,255,255,0.03) 0%,
+      rgba(255,255,255,0) 40%,
+      rgba(255,255,255,0.04) 60%,
+      rgba(255,255,255,0) 100%
+    );
+    pointer-events: none;
+  }
+
+  .tecno__film-badge {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+  }
+
+  .tecno__panel-label {
+    text-align: center;
+    margin-top: 16px;
+    opacity: 0.6;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .tecno__inner {
+      grid-template-columns: 1fr;
+      gap: 48px;
+    }
+    .tecno__panel {
+      max-width: 100%;
+    }
+  }
+</style>

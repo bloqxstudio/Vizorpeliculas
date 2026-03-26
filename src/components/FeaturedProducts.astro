@@ -1,0 +1,571 @@
+---
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  import.meta.env.PUBLIC_SUPABASE_URL,
+  import.meta.env.PUBLIC_SUPABASE_ANON_KEY
+);
+
+const { data, error } = await supabase
+  .from('products')
+  .select('*')
+  .order('num');
+
+if (error) {
+  console.error('Erro ao buscar produtos:', error.message);
+}
+
+const allProducts = (data ?? []).map(p => ({
+  ...p,
+  codeB: `VZB0${p.num}`,
+  codeF: `VZF0${p.num}`,
+  imgPath: `/paineis_hd/${p.folder}/${p.file}`,
+}));
+
+// Marcas únicas para filtro
+const brands = ['Todas', ...new Set(allProducts.map(p => p.brand))];
+---
+
+<section id="produtos" class="catalog" aria-labelledby="catalog-title">
+  <div class="vz-container catalog__inner">
+
+    <!-- Header -->
+    <div class="catalog__header">
+      <div class="catalog__header-left">
+        <p class="vz-overline">Catálogo 2025</p>
+        <h2 id="catalog-title" class="catalog__title">
+          Película Protetora Painel
+        </h2>
+        <p class="catalog__subtitle">{allProducts.length} modelos · {brands.length - 1} marcas · Brilho e Fosco</p>
+      </div>
+      <a href="#buscador" class="catalog__all-link">Buscar por modelo →</a>
+    </div>
+
+    <div class="catalog__rule" aria-hidden="true"></div>
+
+    <!-- Filtros -->
+    <div class="catalog__filter-bar">
+      <input
+        type="text"
+        id="catalog-search"
+        class="catalog__search"
+        placeholder="Buscar por marca, modelo ou código..."
+        aria-label="Filtrar produtos"
+        autocomplete="off"
+      />
+      <span class="catalog__count" id="catalog-count">{allProducts.length} produtos</span>
+    </div>
+
+    <!-- Filtro por marca -->
+    <div class="catalog__brands" id="catalog-brands" role="group" aria-label="Filtrar por marca">
+      {brands.map((b, i) => (
+        <button
+          class={`catalog__brand-btn${i === 0 ? ' active' : ''}`}
+          data-brand={b}
+          type="button"
+        >
+          {b}
+        </button>
+      ))}
+    </div>
+
+    <!-- Grid -->
+    <div class="catalog__grid" id="catalog-grid"></div>
+
+    <p class="catalog__empty" id="catalog-empty" style="display:none;">
+      Nenhum produto encontrado.
+    </p>
+
+    <!-- Ver mais -->
+    <div class="catalog__load-more" id="catalog-load-more" style="display:none;">
+      <button class="catalog__btn-load-more" id="btn-load-more" type="button">
+        <span class="catalog__btn-load-more-text">Ver mais</span>
+        <span class="catalog__btn-load-more-spinner" aria-hidden="true"></span>
+      </button>
+      <span class="catalog__load-more-info" id="load-more-info"></span>
+    </div>
+
+    <div class="catalog__footer">
+      <a href="#buscador" class="vz-btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        Buscar compatibilidade da sua moto
+      </a>
+    </div>
+  </div>
+</section>
+
+<script is:inline define:vars={{ allProducts }}>
+  (function () {
+    const PAGE_SIZE = 20;
+
+    const input      = document.getElementById('catalog-search');
+    const grid       = document.getElementById('catalog-grid');
+    const countEl    = document.getElementById('catalog-count');
+    const empty      = document.getElementById('catalog-empty');
+    const brandsEl   = document.getElementById('catalog-brands');
+    const loadMore   = document.getElementById('catalog-load-more');
+    const btnMore    = document.getElementById('btn-load-more');
+    const moreInfo   = document.getElementById('load-more-info');
+    if (!input || !grid) return;
+
+    let activeBrand = 'todas';
+    let currentPage = 0;
+    let filtered    = [];
+    let isLoading   = false;
+
+    function buildCard(p) {
+      return (
+        '<article data-brand="' + p.brand.toLowerCase() + '" style="display:grid;grid-template-columns:140px 1fr;border:1px solid #e8edf2;border-radius:10px;background:#fff;overflow:hidden;transition:box-shadow 0.2s;">' +
+          '<div style="background:#f0f4f8;display:flex;align-items:center;justify-content:center;padding:16px 12px;min-height:140px;border-right:1px solid #e8edf2;">' +
+            '<img src="' + p.imgPath + '" alt="' + p.brand + ' ' + p.model + '" style="width:110px;height:110px;object-fit:contain;display:block;" loading="lazy" decoding="async">' +
+          '</div>' +
+          '<div style="padding:16px 18px;display:flex;flex-direction:column;justify-content:center;min-width:0;">' +
+            '<div style="font-weight:700;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:#2a7cc7;margin-bottom:3px;">' + p.brand + '</div>' +
+            '<div style="font-weight:700;font-size:16px;color:#0d1f2d;line-height:1.2;margin:0 0 2px;">' + p.model + '</div>' +
+            (p.year ? '<div style="font-size:12px;color:#9aa5b0;margin-bottom:8px;">' + p.year + '</div>' : '') +
+            '<div style="height:1px;background:#e8edf2;margin:6px 0 10px;"></div>' +
+            '<div style="display:flex;gap:20px;">' +
+              '<div style="display:flex;flex-direction:column;gap:2px;">' +
+                '<span style="font-weight:600;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:#9aa5b0;">Brilho</span>' +
+                '<span style="font-family:monospace;font-weight:600;font-size:13px;color:#2a7cc7;letter-spacing:0.03em;">' + p.codeB + '</span>' +
+              '</div>' +
+              '<div style="display:flex;flex-direction:column;gap:2px;">' +
+                '<span style="font-weight:600;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:#9aa5b0;">Fosco</span>' +
+                '<span style="font-family:monospace;font-weight:600;font-size:13px;color:#0d1f2d;letter-spacing:0.03em;">' + p.codeF + '</span>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+        '</article>'
+      );
+    }
+
+    function applyFilter() {
+      const q = input.value.trim().toLowerCase().replace(/\s+/g, ' ');
+      filtered = allProducts.filter(function (p) {
+        const matchBrand  = activeBrand === 'todas' || p.brand.toLowerCase() === activeBrand;
+        const matchSearch = !q || (p.brand + ' ' + p.model + ' ' + p.codeB + ' ' + p.codeF + ' ' + p.num).toLowerCase().includes(q);
+        return matchBrand && matchSearch;
+      });
+      currentPage = 0;
+      grid.innerHTML = '';
+      renderPage();
+    }
+
+    function renderPage() {
+      const start = currentPage * PAGE_SIZE;
+      const slice = filtered.slice(start, start + PAGE_SIZE);
+      const frag  = document.createDocumentFragment();
+      const tmp   = document.createElement('div');
+      slice.forEach(function (p) {
+        tmp.innerHTML = buildCard(p);
+        frag.appendChild(tmp.firstElementChild);
+      });
+      grid.appendChild(frag);
+      currentPage++;
+
+      const shown = Math.min(currentPage * PAGE_SIZE, filtered.length);
+      const total = filtered.length;
+
+      countEl.textContent = total + ' produto' + (total !== 1 ? 's' : '');
+      empty.style.display = total === 0 ? '' : 'none';
+
+      if (shown < total) {
+        loadMore.style.display = 'flex';
+        moreInfo.textContent   = shown + ' de ' + total + ' exibidos';
+      } else {
+        loadMore.style.display = 'none';
+      }
+    }
+
+    btnMore.addEventListener('click', function () {
+      if (isLoading) return;
+      isLoading = true;
+      btnMore.classList.add('loading');
+      // pequeno delay para mostrar o spinner e evitar tranco visual
+      setTimeout(function () {
+        renderPage();
+        isLoading = false;
+        btnMore.classList.remove('loading');
+      }, 180);
+    });
+
+    input.addEventListener('input', applyFilter);
+
+    if (brandsEl) {
+      brandsEl.addEventListener('click', function (e) {
+        const btn = e.target.closest('.catalog__brand-btn');
+        if (!btn) return;
+        brandsEl.querySelectorAll('.catalog__brand-btn').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        activeBrand = btn.dataset.brand.toLowerCase();
+        applyFilter();
+      });
+    }
+
+    // carga inicial
+    applyFilter();
+  })();
+</script>
+
+<style>
+  .catalog {
+    background-color: #fff;
+    padding: var(--section-py) 0;
+  }
+
+  .catalog__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .catalog__header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  .catalog__header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .catalog__title {
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: clamp(22px, 2.8vw, 30px);
+    color: var(--vz-600);
+    margin: 0;
+  }
+
+  .catalog__subtitle {
+    font-family: var(--font-body);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--vz-gray-500);
+    margin: 0;
+  }
+
+  .catalog__all-link {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 13.5px;
+    color: var(--vz-600);
+    text-decoration: none;
+    transition: color 0.2s;
+    white-space: nowrap;
+    padding-bottom: 4px;
+  }
+  .catalog__all-link:hover { color: var(--vz-500); }
+
+  .catalog__rule {
+    height: 2px;
+    background: linear-gradient(90deg, var(--vz-600) 0%, var(--vz-400) 60%, transparent 100%);
+    margin-bottom: 24px;
+  }
+
+  /* Filtros */
+  .catalog__filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .catalog__search {
+    flex: 1;
+    min-width: 240px;
+    max-width: 400px;
+    height: 40px;
+    padding: 0 14px;
+    border: 1.5px solid var(--vz-gray-200);
+    border-radius: 6px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--vz-gray-900);
+    background: #fff;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .catalog__search:focus {
+    border-color: var(--vz-500);
+    box-shadow: 0 0 0 3px rgba(0,120,200,0.08);
+  }
+  .catalog__search::placeholder { color: var(--vz-gray-400); }
+
+  .catalog__count {
+    font-family: var(--font-body);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--vz-gray-500);
+    white-space: nowrap;
+  }
+
+  /* Filtro por marca */
+  .catalog__brands {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 6px;
+    margin-bottom: 32px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .catalog__brands::-webkit-scrollbar {
+    display: none;
+  }
+
+  .catalog__brand-btn {
+    padding: 5px 14px;
+    border: 1.5px solid var(--vz-gray-200);
+    border-radius: 20px;
+    font-family: var(--font-body);
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--vz-gray-600);
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.18s;
+    white-space: nowrap;
+  }
+  .catalog__brand-btn:hover {
+    border-color: var(--vz-500);
+    color: var(--vz-600);
+  }
+  .catalog__brand-btn.active {
+    background: var(--vz-600);
+    border-color: var(--vz-600);
+    color: #fff;
+  }
+
+  /* Grid */
+  .catalog__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  /* Card */
+  .cat-card {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    border: 1px solid #e8edf2;
+    border-radius: 10px;
+    background: #fff;
+    transition: box-shadow 0.2s, border-color 0.2s;
+    overflow: hidden;
+    margin: 8px;
+  }
+  .cat-card:hover {
+    border-color: var(--vz-200);
+    box-shadow: 0 4px 20px rgba(10,46,74,0.08);
+  }
+
+  .cat-card__img-wrap {
+    background: #f0f4f8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 16px;
+    min-height: 160px;
+    border-right: 1px solid #e8edf2;
+    overflow: hidden;
+  }
+
+  .cat-card__img {
+    width: 128px;
+    height: 128px;
+    object-fit: contain;
+    display: block;
+  }
+
+  .cat-card__body {
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0;
+    min-width: 0;
+  }
+
+  .cat-card__brand-tag {
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #2a7cc7;
+    margin-bottom: 4px;
+  }
+
+  .cat-card__name {
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 18px;
+    color: #0d1f2d;
+    line-height: 1.2;
+    margin: 0 0 2px;
+  }
+
+  .cat-card__year {
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: #9aa5b0;
+    margin: 0 0 10px;
+  }
+
+  .cat-card__rule {
+    height: 1px;
+    background: #e8edf2;
+    margin: 8px 0 12px;
+  }
+
+  .cat-card__codes {
+    display: flex;
+    gap: 24px;
+  }
+
+  .cat-card__code-col {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .cat-card__code-label {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #9aa5b0;
+  }
+
+  .cat-card__code-value {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 15px;
+    color: #0d1f2d;
+    letter-spacing: 0.03em;
+  }
+  .cat-card__code-value--brilho { color: #2a7cc7; }
+
+  .cat-card__wpp-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 14px;
+    padding: 5px 10px;
+    background: #128C4A;
+    color: #fff;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 11.5px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    border-radius: 3px;
+    text-decoration: none;
+    border-left: 3px solid #25D366;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    width: fit-content;
+    transition: background 0.2s, box-shadow 0.2s;
+  }
+  .cat-card__wpp-btn:hover {
+    background: #0f7a3f;
+    box-shadow: 0 3px 10px rgba(18,140,74,0.4);
+  }
+
+  .catalog__empty {
+    text-align: center;
+    padding: 48px 24px;
+    font-family: var(--font-body);
+    font-size: 15px;
+    color: var(--vz-gray-500);
+  }
+
+  /* Load more */
+  .catalog__load-more {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding-top: 32px;
+  }
+
+  .catalog__btn-load-more {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background-color: var(--vz-600);
+    color: #fff;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 14px;
+    padding: 0 28px;
+    height: 44px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.15s;
+    min-width: 160px;
+  }
+
+  .catalog__btn-load-more:hover:not(:disabled) {
+    background-color: var(--vz-500);
+    transform: translateY(-1px);
+  }
+
+  .catalog__btn-load-more-spinner {
+    display: none;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    flex-shrink: 0;
+  }
+
+  .catalog__btn-load-more.loading .catalog__btn-load-more-text {
+    opacity: 0.6;
+  }
+
+  .catalog__btn-load-more.loading .catalog__btn-load-more-spinner {
+    display: inline-block;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .catalog__load-more-info {
+    font-family: var(--font-body);
+    font-size: 12px;
+    color: var(--vz-gray-400);
+    letter-spacing: 0.04em;
+  }
+
+  .catalog__footer {
+    display: flex;
+    justify-content: center;
+    padding-top: 48px;
+  }
+
+  @media (max-width: 900px) {
+    .catalog__grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 560px) {
+    .catalog__grid { grid-template-columns: 1fr; }
+  }
+</style>

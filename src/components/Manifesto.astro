@@ -1,0 +1,297 @@
+---
+// Manifesto / Sobre — Seção emocional da marca
+---
+
+<section id="sobre" class="manifesto" aria-labelledby="manifesto-title">
+  <!-- Background decorative element -->
+  <div class="manifesto__bg" aria-hidden="true">
+    <div class="manifesto__bg-circle"></div>
+    <div class="manifesto__bg-grid"></div>
+  </div>
+
+  <div class="vz-container manifesto__inner">
+
+    <!-- Left: quote & brand story -->
+    <div class="manifesto__left">
+      <!-- Quote mark -->
+      <div class="manifesto__quote-mark" aria-hidden="true">"</div>
+
+      <blockquote class="manifesto__quote" cite="https://vizor.com.br">
+        <p class="manifesto__quote-text">
+          Quando há paixão no que se faz, o resultado é excelência. Por isso, cada detalhe
+          <strong>Vizor</strong> entrega proteção e estilo com propósito.
+        </p>
+      </blockquote>
+
+      <div class="manifesto__attr">
+        <div class="vz-divider"></div>
+        <span class="manifesto__attr-text">Missão Vizor</span>
+      </div>
+    </div>
+
+    <!-- Right: company info -->
+    <div class="manifesto__right">
+      <p class="vz-overline" style="color: var(--vz-300);">Nossa história</p>
+      <h2 id="manifesto-title" class="vz-display-m manifesto__title">
+        100% Brasileiro.<br />
+        <span class="manifesto__title-accent">100% Dedicado.</span>
+      </h2>
+
+      <p class="manifesto__text">
+        A Vizor nasceu em <strong>março de 2025</strong> da paixão por carros e motocicletas.
+        Sediada em São Leopoldo, Rio Grande do Sul, nascemos com a missão de elevar o padrão
+        de proteção para painéis de instrumentos no mercado nacional.
+      </p>
+
+      <p class="manifesto__text">
+        Combinamos tecnologia de ponta, processos produtivos bem definidos e inovação
+        contínua para entregar películas que protegem sem comprometer o visual original da sua moto.
+      </p>
+
+      <!-- Info cards -->
+      <div class="manifesto__cards">
+        <div class="manifesto__card">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="manifesto__card-icon" aria-hidden="true">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          <div>
+            <span class="manifesto__card-label">Localização</span>
+            <span class="manifesto__card-value">São Leopoldo, RS</span>
+          </div>
+        </div>
+
+        <div class="manifesto__card">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="manifesto__card-icon" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          <div>
+            <span class="manifesto__card-label">Fundação</span>
+            <span class="manifesto__card-value">Março de 2025</span>
+          </div>
+        </div>
+
+        <div class="manifesto__card">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="manifesto__card-icon" aria-hidden="true">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+          <div>
+            <span class="manifesto__card-label">Posição</span>
+            <span class="manifesto__card-value">Top fabricantes nacionais</span>
+          </div>
+        </div>
+
+        <div class="manifesto__card">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="manifesto__card-icon" aria-hidden="true">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          <div>
+            <span class="manifesto__card-label">Qualidade</span>
+            <span class="manifesto__card-value">SGQ ativo · ISO-aligned</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .manifesto {
+    background-color: var(--vz-800);
+    padding: var(--section-py) 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* BG */
+  .manifesto__bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .manifesto__bg-circle {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    border: 1px solid rgba(46,139,199,0.08);
+    top: 50%;
+    left: -200px;
+    transform: translateY(-50%);
+  }
+
+  .manifesto__bg-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(46,139,199,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(46,139,199,0.05) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: linear-gradient(to right, transparent, black 30%, black 70%, transparent);
+  }
+
+  /* Layout */
+  .manifesto__inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Left */
+  .manifesto__left {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    padding-top: 24px;
+  }
+
+  .manifesto__quote-mark {
+    position: absolute;
+    top: -32px;
+    left: -16px;
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 160px;
+    line-height: 1;
+    color: rgba(46,139,199,0.08);
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .manifesto__quote {
+    margin: 0;
+    padding: 0;
+  }
+
+  .manifesto__quote-text {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(22px, 2.5vw, 30px);
+    line-height: 1.35;
+    color: rgba(255,255,255,0.9);
+    font-style: italic;
+    margin: 0;
+  }
+
+  .manifesto__quote-text strong {
+    color: var(--vz-300);
+    font-style: normal;
+  }
+
+  .manifesto__attr {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .manifesto__attr-text {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+  }
+
+  /* Right */
+  .manifesto__right {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .manifesto__title {
+    color: #fff;
+    margin: 0;
+  }
+
+  .manifesto__title-accent {
+    color: var(--vz-300);
+  }
+
+  .manifesto__text {
+    font-size: 15.5px;
+    line-height: 1.75;
+    color: rgba(255,255,255,0.55);
+    margin: 0;
+  }
+
+  .manifesto__text strong {
+    color: rgba(255,255,255,0.8);
+    font-weight: 600;
+  }
+
+  /* Info cards */
+  .manifesto__cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 8px;
+  }
+
+  .manifesto__card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    transition: background 0.2s;
+  }
+
+  .manifesto__card:hover {
+    background: rgba(255,255,255,0.07);
+  }
+
+  .manifesto__card-icon {
+    color: var(--vz-400);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .manifesto__card > div {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .manifesto__card-label {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--vz-400);
+  }
+
+  .manifesto__card-value {
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    color: rgba(255,255,255,0.75);
+    font-weight: 500;
+    line-height: 1.3;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .manifesto__inner {
+      grid-template-columns: 1fr;
+      gap: 48px;
+    }
+
+    .manifesto__quote-mark { font-size: 120px; }
+    .manifesto__cards { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 480px) {
+    .manifesto__cards { grid-template-columns: 1fr; }
+  }
+</style>

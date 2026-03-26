@@ -1,12 +1,16 @@
 ---
 import '../styles/global.css';
+import Preloader from '../components/Preloader.astro';
 
 interface Props {
   title: string;
   description?: string;
 }
 
-const { title, description = 'Vizor Películas - Seu catálogo de filmes' } = Astro.props;
+const {
+  title,
+  description = 'Vizor Películas Protetoras — Fabricante nacional de películas para painéis de motocicletas. Mais de 200 modelos. Acabamento Brilho e Fosco.'
+} = Astro.props;
 ---
 
 <!doctype html>
@@ -17,9 +21,122 @@ const { title, description = 'Vizor Películas - Seu catálogo de filmes' } = As
     <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
-    <title>{title} | Vizor Películas</title>
+    <title>{title} | Vizor Películas Protetoras</title>
+
+    <!-- Open Graph -->
+    <meta property="og:title" content={`${title} | Vizor Películas Protetoras`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="pt_BR" />
+
+    <!-- CSS crítico inline: renderiza fundo, cores e layout base antes de qualquer arquivo externo -->
+    <style is:inline>
+      :root {
+        --vz-900: #021A2D;
+        --vz-800: #0A2E4A;
+        --vz-700: #0D3E63;
+        --vz-600: #1A5C8A;
+        --vz-500: #2172A8;
+        --vz-400: #2E8BC7;
+        --vz-300: #5BAEE0;
+        --vz-200: #93CDF0;
+        --vz-100: #C6E6F8;
+        --vz-50:  #EAF5FC;
+        --vz-gray-900: #1C2730;
+        --vz-gray-700: #3A4B57;
+        --vz-gray-500: #6B7E8C;
+        --vz-gray-300: #B8C4CC;
+        --vz-gray-100: #EDF0F2;
+        --vz-off-white: #F5F7F9;
+        --font-display: 'Barlow Condensed', sans-serif;
+        --font-body: 'Barlow', sans-serif;
+        --font-mono: 'JetBrains Mono', monospace;
+        --section-py: 100px;
+        --container-px: 32px;
+        --container-max: 1280px;
+      }
+      *, *::before, *::after { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        background-color: #F5F7F9;
+        color: #1C2730;
+        font-family: 'Barlow', sans-serif;
+        font-size: 16px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      img { max-width: 100%; height: auto; }
+
+      /* Navbar acima de tudo imediatamente */
+      .navbar {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        z-index: 100;
+        background-color: rgba(10, 46, 74, 0.95);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(46, 139, 199, 0.15);
+      }
+
+      /* Hero ocupa viewport imediatamente — sem relayout */
+      .hero {
+        position: relative;
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        background-color: #0A2E4A;
+        background-image:
+          linear-gradient(105deg,
+            rgba(2,26,45,0.95) 0%,
+            rgba(10,46,74,0.90) 40%,
+            rgba(10,46,74,0.70) 70%,
+            rgba(10,46,74,0.50) 100%),
+          url('/bg.png');
+        background-size: cover;
+        background-position: center 35%;
+      }
+
+      /* Oculta elementos animados pelo GSAP até ele rodar */
+      .gsap-init { visibility: hidden; }
+
+      /* Navbar oculta via CSS — GSAP sobrescreve no momento certo */
+      #navbar { opacity: 0; }
+
+      @media (max-width: 768px) {
+        :root {
+          --section-py: 64px;
+          --container-px: 20px;
+        }
+      }
+    </style>
+
+    <!-- Preconnect para fontes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Google Fonts: não-bloqueante com font-display=swap -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,900;1,900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,900;1,900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
   </head>
   <body>
+    <Preloader />
     <slot />
+    <!-- GSAP no final do body: não bloqueia parsing nem renderização -->
+    <script is:inline src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
+    <script is:inline src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js" defer></script>
   </body>
 </html>
