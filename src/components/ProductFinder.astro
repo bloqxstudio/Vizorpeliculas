@@ -1006,7 +1006,8 @@
           const imgHtml = imgSrc
             ? `<div class="finder__result-img-wrap"><img src="${imgSrc}" alt="${r.model}" class="finder__result-img" loading="lazy" decoding="async" /></div>`
             : '';
-          const wppMsg = `Olá! Vi esse produto no site da Vizor Películas e tenho interesse:\n\n*${r.model}* (${r.year})\nCódigo: ${r.codeB}\n\n🔗 ${window.location.href.split('?')[0]}`;
+          const productUrl = `https://vizorpeliculas.com.br/produto/${r.codeB}`;
+          const wppMsg = `Olá! Vi esse produto no site da Vizor Películas e tenho interesse:\n\n*${r.model}* (${r.year})\nCódigo: ${r.codeB}\n\n🔗 ${productUrl}`;
           const wppUrl = `https://wa.me/5551980230392?text=${encodeURIComponent(wppMsg)}`;
           return `
           <div class="finder__result-card" style="display:grid;grid-template-columns:minmax(0,160px) minmax(0,1fr);border:1px solid #e8edf2;border-radius:10px;overflow:hidden;background:#fff;">
