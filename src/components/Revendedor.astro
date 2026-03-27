@@ -121,6 +121,12 @@
           </div>
         </div>
 
+        <!-- Honeypot (anti-bot, invisível para humanos) -->
+        <div style="position:absolute;left:-9999px;opacity:0;pointer-events:none;" aria-hidden="true">
+          <label for="r-website">Website</label>
+          <input type="text" id="r-website" name="website" tabindex="-1" autocomplete="off" />
+        </div>
+
         <!-- Submit -->
         <button type="submit" class="revend__submit" id="revend-submit">
           <span class="revend__submit-text">Quero ser revendedor</span>
@@ -387,6 +393,8 @@
 </style>
 
 <script>
+  import { supabase } from '../lib/supabase';
+
   const form = document.getElementById('revend-form') as HTMLFormElement;
   const successEl = document.getElementById('revend-success') as HTMLDivElement;
   const submitBtn = document.getElementById('revend-submit') as HTMLButtonElement;
@@ -399,11 +407,29 @@
       return;
     }
 
-    // Simulate submission (replace with real API call)
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<span>Enviando...</span>';
 
-    await new Promise(r => setTimeout(r, 1000));
+    const data = new FormData(form);
+
+    // Honeypot: bots preenchem esse campo, humanos não
+    if (data.get('website')) return;
+
+    const nome     = (data.get('nome')     as string).trim().slice(0, 120);
+    const empresa  = (data.get('empresa')  as string).trim().slice(0, 120);
+    const cidade   = (data.get('cidade')   as string).trim().slice(0, 120);
+    const whatsapp = (data.get('whatsapp') as string).trim().slice(0, 30);
+
+    const { error } = await supabase.from('distributor_leads').insert({
+      nome, empresa, cidade, whatsapp,
+    });
+
+    if (error) {
+      console.error('Erro ao salvar lead:', error.message);
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<span>Quero ser revendedor</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
+      return;
+    }
 
     form.reset();
     submitBtn.style.display = 'none';
