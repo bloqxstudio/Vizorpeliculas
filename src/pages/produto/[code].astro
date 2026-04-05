@@ -1,31 +1,28 @@
 ---
-export const prerender = false;
-
 import { supabase } from '../../lib/supabase';
 
-const { code: routeCode } = Astro.params;
+export async function getStaticPaths() {
+  const { data } = await supabase.from('products').select('num, brand, model, year, folder, file, image_url');
+  if (!data) return [];
 
-// Determina variante e extrai o num do código (VZB0123 ou VZF0123)
-const variant = routeCode?.startsWith('VZB') ? 'brilho' : routeCode?.startsWith('VZF') ? 'fosco' : null;
-const num = routeCode ? parseInt(routeCode.replace(/^VZ[BF]0/, ''), 10) : null;
+  const BUCKET_URL = 'https://bbrxcoxuzulieywudotl.supabase.co/storage/v1/object/public/products-images';
 
-if (!variant || !num || isNaN(num)) {
-  return Astro.redirect('/');
+  const paths = [];
+  for (const p of data) {
+    const imgPath = p.image_url ?? `${BUCKET_URL}/${p.folder}/${p.file}`;
+    paths.push({ params: { code: `VZB0${p.num}` }, props: { p, variant: 'brilho', imgPath } });
+    paths.push({ params: { code: `VZF0${p.num}` }, props: { p, variant: 'fosco', imgPath } });
+  }
+  return paths;
 }
 
-const { data: p } = await supabase.from('products').select('*').eq('num', num).single();
-
-if (!p) {
-  return Astro.redirect('/');
-}
+const { p, variant, imgPath } = Astro.props;
 
 const codeB = `VZB0${p.num}`;
 const codeF = `VZF0${p.num}`;
 
 const SITE_URL = 'https://vizorpeliculas.com.br';
-const BUCKET_URL = 'https://bbrxcoxuzulieywudotl.supabase.co/storage/v1/object/public/products-images';
-const imgPath = p.image_url ?? `${BUCKET_URL}/${p.folder}/${p.file}`;
-const ogImage = p.image_url ?? `${BUCKET_URL}/${p.folder}/${p.file}`;
+const ogImage = imgPath;
 const productName = `${p.brand} ${p.model}${p.year ? ` (${p.year})` : ''}`;
 const variantLabel = variant === 'brilho' ? 'Brilho' : 'Fosco';
 const code = variant === 'brilho' ? codeB : codeF;
