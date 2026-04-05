@@ -14,7 +14,7 @@ const allProducts = (data ?? []).map(p => ({
   ...p,
   codeB: `VZB0${p.num}`,
   codeF: `VZF0${p.num}`,
-  imgPath: `/paineis_hd/${p.folder}/${p.file}`,
+  imgPath: p.image_url ?? `/paineis_hd/${p.folder}/${p.file}`,
 }));
 
 // Marcas únicas para filtro
@@ -65,7 +65,23 @@ const brands = ['Todas', ...new Set(allProducts.map(p => p.brand))];
     </div>
 
     <!-- Grid -->
-    <div class="catalog__grid" id="catalog-grid"></div>
+    <div class="catalog__grid" id="catalog-grid">
+      {Array.from({ length: 6 }).map(() => (
+        <div class="cat-skeleton">
+          <div class="cat-skeleton__img"></div>
+          <div class="cat-skeleton__body">
+            <div class="cat-skeleton__line cat-skeleton__line--short"></div>
+            <div class="cat-skeleton__line cat-skeleton__line--long"></div>
+            <div class="cat-skeleton__line cat-skeleton__line--medium"></div>
+            <div class="cat-skeleton__spacer"></div>
+            <div class="cat-skeleton__codes">
+              <div class="cat-skeleton__code"></div>
+              <div class="cat-skeleton__code"></div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
 
     <p class="catalog__empty" id="catalog-empty" style="display:none;">
       Nenhum produto encontrado.
@@ -486,6 +502,70 @@ const brands = ['Todas', ...new Set(allProducts.map(p => p.brand))];
     font-family: var(--font-body);
     font-size: 15px;
     color: var(--vz-gray-500);
+  }
+
+  /* Skeleton */
+  @keyframes shimmer {
+    0%   { background-position: -400px 0; }
+    100% { background-position: 400px 0; }
+  }
+
+  .cat-skeleton {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    border: 1px solid #e8edf2;
+    border-radius: 10px;
+    background: #fff;
+    overflow: hidden;
+  }
+
+  .cat-skeleton__img {
+    background: #f0f4f8;
+    min-height: 140px;
+    border-right: 1px solid #e8edf2;
+    background-image: linear-gradient(90deg, #f0f4f8 25%, #e4eaf0 50%, #f0f4f8 75%);
+    background-size: 800px 100%;
+    animation: shimmer 1.4s infinite linear;
+  }
+
+  .cat-skeleton__body {
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .cat-skeleton__line {
+    height: 10px;
+    border-radius: 4px;
+    background-image: linear-gradient(90deg, #e8edf2 25%, #dce3ea 50%, #e8edf2 75%);
+    background-size: 800px 100%;
+    animation: shimmer 1.4s infinite linear;
+  }
+
+  .cat-skeleton__line--short  { width: 40%; }
+  .cat-skeleton__line--long   { width: 75%; height: 14px; }
+  .cat-skeleton__line--medium { width: 30%; }
+
+  .cat-skeleton__spacer {
+    height: 1px;
+    background: #e8edf2;
+    margin: 2px 0;
+  }
+
+  .cat-skeleton__codes {
+    display: flex;
+    gap: 20px;
+  }
+
+  .cat-skeleton__code {
+    width: 64px;
+    height: 14px;
+    border-radius: 4px;
+    background-image: linear-gradient(90deg, #e8edf2 25%, #dce3ea 50%, #e8edf2 75%);
+    background-size: 800px 100%;
+    animation: shimmer 1.4s infinite linear;
   }
 
   /* Load more */

@@ -1,25 +1,30 @@
 ---
+export const prerender = false;
+
 import { supabase } from '../../lib/supabase';
 
-export async function getStaticPaths() {
-  const { data } = await supabase.from('products').select('*').order('num');
-  const products = data ?? [];
+const { code: routeCode } = Astro.params;
 
-  return products.flatMap(p => {
-    const codeB = `VZB0${p.num}`;
-    const codeF = `VZF0${p.num}`;
-    return [
-      { params: { code: codeB }, props: { product: p, variant: 'brilho', codeB, codeF } },
-      { params: { code: codeF }, props: { product: p, variant: 'fosco', codeB, codeF } },
-    ];
-  });
+// Determina variante e extrai o num do código (VZB0123 ou VZF0123)
+const variant = routeCode?.startsWith('VZB') ? 'brilho' : routeCode?.startsWith('VZF') ? 'fosco' : null;
+const num = routeCode ? parseInt(routeCode.replace(/^VZ[BF]0/, ''), 10) : null;
+
+if (!variant || !num || isNaN(num)) {
+  return Astro.redirect('/');
 }
 
-const { product: p, variant, codeB, codeF } = Astro.props;
+const { data: p } = await supabase.from('products').select('*').eq('num', num).single();
+
+if (!p) {
+  return Astro.redirect('/');
+}
+
+const codeB = `VZB0${p.num}`;
+const codeF = `VZF0${p.num}`;
 
 const SITE_URL = 'https://vizorpeliculas.com.br';
-const imgPath = `/paineis_hd/${p.folder}/${p.file}`;
-const ogImage = `${SITE_URL}${imgPath}`;
+const imgPath = p.image_url ?? `/paineis_hd/${p.folder}/${p.file}`;
+const ogImage = p.image_url ?? `${SITE_URL}/paineis_hd/${p.folder}/${p.file}`;
 const productName = `${p.brand} ${p.model}${p.year ? ` (${p.year})` : ''}`;
 const variantLabel = variant === 'brilho' ? 'Brilho' : 'Fosco';
 const code = variant === 'brilho' ? codeB : codeF;
