@@ -23,8 +23,9 @@ const codeB = `VZB0${p.num}`;
 const codeF = `VZF0${p.num}`;
 
 const SITE_URL = 'https://vizorpeliculas.com.br';
-const imgPath = p.image_url ?? `/paineis_hd/${p.folder}/${p.file}`;
-const ogImage = p.image_url ?? `${SITE_URL}/paineis_hd/${p.folder}/${p.file}`;
+const BUCKET_URL = 'https://bbrxcoxuzulieywudotl.supabase.co/storage/v1/object/public/products-images';
+const imgPath = p.image_url ?? `${BUCKET_URL}/${p.folder}/${p.file}`;
+const ogImage = p.image_url ?? `${BUCKET_URL}/${p.folder}/${p.file}`;
 const productName = `${p.brand} ${p.model}${p.year ? ` (${p.year})` : ''}`;
 const variantLabel = variant === 'brilho' ? 'Brilho' : 'Fosco';
 const code = variant === 'brilho' ? codeB : codeF;

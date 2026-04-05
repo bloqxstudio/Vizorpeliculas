@@ -10,11 +10,13 @@ if (error) {
   console.error('Erro ao buscar produtos:', error.message);
 }
 
+const BUCKET_URL = 'https://bbrxcoxuzulieywudotl.supabase.co/storage/v1/object/public/products-images';
+
 const allProducts = (data ?? []).map(p => ({
   ...p,
   codeB: `VZB0${p.num}`,
   codeF: `VZF0${p.num}`,
-  imgPath: p.image_url ?? `/paineis_hd/${p.folder}/${p.file}`,
+  imgPath: p.image_url ?? `${BUCKET_URL}/${p.folder}/${p.file}`,
 }));
 
 // Marcas únicas para filtro
