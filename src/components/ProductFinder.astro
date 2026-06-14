@@ -1,5 +1,41 @@
 ---
-// ProductFinder — Buscador de Compatibilidade por Marca / Modelo / Ano
+import { supabase } from '../lib/supabase';
+
+const { data: products } = await supabase
+  .from('products')
+  .select('num, brand, model, year, image_url')
+  .order('num');
+
+// Normaliza brand name para chave do select
+function brandKey(brand: string): string {
+  return brand.toLowerCase().replace(/[\s\-\/]+/g, '_');
+}
+
+// Monta catalog agrupado por marca
+const catalogMap: Record<string, { model: string; year: string; codeB: string; codeF: string }[]> = {};
+const imgMap: Record<string, string> = {};
+const brandLabels: Record<string, string> = {};
+
+for (const p of products ?? []) {
+  const key = brandKey(p.brand);
+  const codeB = `VZB0${p.num}`;
+  const codeF = `VZF0${p.num}`;
+
+  if (!catalogMap[key]) {
+    catalogMap[key] = [];
+    brandLabels[key] = p.brand;
+  }
+  catalogMap[key].push({ model: p.model, year: p.year ?? '', codeB, codeF });
+  if (p.image_url) imgMap[codeB] = p.image_url;
+}
+
+const brandsOrdered = Object.keys(catalogMap).sort((a, b) =>
+  brandLabels[a].localeCompare(brandLabels[b])
+);
+
+const catalogJSON = JSON.stringify(catalogMap);
+const imgMapJSON  = JSON.stringify(imgMap);
+const labelsJSON  = JSON.stringify(brandLabels);
 ---
 
 <section id="buscador" class="finder" aria-labelledby="finder-title">
@@ -48,22 +84,9 @@
             <label class="finder__label" for="select-brand">Marca</label>
             <select class="vz-select" id="select-brand" name="brand" aria-required="true">
               <option value="">Selecione a marca</option>
-              <option value="bajaj">Bajaj</option>
-              <option value="bmw">BMW</option>
-              <option value="dafra">Dafra</option>
-              <option value="ducati">Ducati</option>
-              <option value="haojue">Haojue</option>
-              <option value="harley">Harley Davidson</option>
-              <option value="honda">Honda</option>
-              <option value="kawasaki">Kawasaki</option>
-              <option value="ktm">KTM</option>
-              <option value="royal_enfield">Royal Enfield</option>
-              <option value="shineray">Shineray</option>
-              <option value="suzuki">Suzuki</option>
-              <option value="triumph">Triumph</option>
-              <option value="voltz">Voltz</option>
-              <option value="yamaha">Yamaha</option>
-              <option value="zontes">Zontes</option>
+              {brandsOrdered.map(key => (
+                <option value={key}>{brandLabels[key]}</option>
+              ))}
             </select>
           </div>
 
@@ -105,11 +128,11 @@
       <div class="finder__popular" id="finder-popular">
         <span class="finder__popular-label">Mais buscados:</span>
         <div class="finder__popular-tags">
-          <button class="finder__tag" data-brand="honda" data-model="CB 300F Twister" data-year="2023">Honda CB 300F</button>
-          <button class="finder__tag" data-brand="yamaha" data-model="MT-03" data-year="2021">Yamaha MT-03</button>
-          <button class="finder__tag" data-brand="kawasaki" data-model="Ninja ZX-10R" data-year="2020">Kawasaki Ninja ZX-10R</button>
-          <button class="finder__tag" data-brand="bmw" data-model="R1250 GS" data-year="2019">BMW R1250 GS</button>
-          <button class="finder__tag" data-brand="royal_enfield" data-model="Meteor 350" data-year="2022">Royal Enfield Meteor</button>
+          <button class="finder__tag" data-brand="honda" data-model="CB 300F Twister" data-year="2023+">Honda CB 300F</button>
+          <button class="finder__tag" data-brand="yamaha" data-model="MT-03" data-year="2021–2026">Yamaha MT-03</button>
+          <button class="finder__tag" data-brand="kawasaki" data-model="Ninja ZX-10R" data-year="2020–2025">Kawasaki Ninja ZX-10R</button>
+          <button class="finder__tag" data-brand="bmw" data-model="R1250 GS / GS Adventure" data-year="2019–2025">BMW R1250 GS</button>
+          <button class="finder__tag" data-brand="royal_enfield" data-model="Meteor 350 / Scram 411" data-year="2022–2025">Royal Enfield Meteor</button>
         </div>
       </div>
     </div>
@@ -159,7 +182,6 @@
     margin: 0;
   }
 
-  /* Card */
   .finder__card {
     background: #fff;
     border: 1px solid var(--vz-gray-100);
@@ -171,7 +193,6 @@
     gap: 32px;
   }
 
-  /* Steps */
   .finder__steps {
     display: flex;
     align-items: center;
@@ -225,7 +246,6 @@
     align-items: center;
   }
 
-  /* Selects */
   .finder__selects {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr auto;
@@ -253,7 +273,6 @@
     user-select: none;
   }
 
-  /* Search button */
   .finder__btn-search {
     display: flex;
     align-items: center;
@@ -284,7 +303,6 @@
     transform: none;
   }
 
-  /* Results */
   .finder__results {
     display: none;
   }
@@ -324,7 +342,6 @@
     min-height: 160px;
     border-right: 1px solid var(--vz-gray-100);
     overflow: hidden;
-    /* Impede que o conteúdo expanda a coluna além de 160px */
     min-width: 0;
     max-width: 160px;
   }
@@ -334,7 +351,6 @@
     height: 128px;
     object-fit: contain;
     display: block;
-    /* Impede que a imagem nativa (HD grande) expanda o wrapper */
     flex-shrink: 0;
     min-width: 0;
   }
@@ -497,7 +513,6 @@
     border-bottom: 1px solid var(--vz-gray-100);
   }
 
-  /* Popular */
   .finder__popular {
     display: flex;
     align-items: center;
@@ -541,7 +556,6 @@
     color: var(--vz-600);
   }
 
-  /* Responsive */
   @media (max-width: 900px) {
     .finder__card { padding: 28px 24px; }
     .finder__selects {
@@ -565,384 +579,50 @@
   }
 </style>
 
-<script>
-  // ── Image map ──────────────────────────────────────────────────
-  const imgMap: Record<string, string> = {
-    'VZB0001': '/paineis_hd/01_bajaj/VZB0001_bajaj_dominar_400_2023-2025.png',
-    'VZB0002': '/paineis_hd/01_bajaj/VZB0002_bajaj_dominar_200_2023-2025.png',
-    'VZB0003': '/paineis_hd/01_bajaj/VZB0003_bajaj_dominar_ns200_2025.png',
-    'VZB0004': '/paineis_hd/01_bajaj/VZB0004_bajaj_pulsar_n150_2025.png',
-    'VZB0005': '/paineis_hd/01_bajaj/VZB0005_bajaj_dominar_ns160_2025.png',
-    'VZB0006': '/paineis_hd/01_bajaj/VZB0006_bajaj_dominar_160_2023-2025.png',
-    'VZB0007': '/paineis_hd/01_bajaj/VZB0007_bajaj_dominar_250_2025.png',
-    'VZB0008': '/paineis_hd/03_bmw/VZB0008_bmw_r1250gs_gs_adventure_2019-2025.png',
-    'VZB0009': '/paineis_hd/03_bmw/VZB0009_bmw_f850gs_gs_adventure_2019-2025.png',
-    'VZB0010': '/paineis_hd/03_bmw/VZB0010_bmw_r1300gs_gs_adventure_2024plus.png',
-    'VZB0011': '/paineis_hd/03_bmw/VZB0011_bmw_f900r_2019-2025.png',
-    'VZB0012': '/paineis_hd/03_bmw/VZB0012_bmw_s1000rr_2019-2025.png',
-    'VZB0013': '/paineis_hd/03_bmw/VZB0013_bmw_g310gs_2017-2024.png',
-    'VZB0014': '/paineis_hd/03_bmw/VZB0014_bmw_f900gs_2024plus.png',
-    'VZB0015': '/paineis_hd/03_bmw/VZB0015_bmw_r1200gs_2012-2018.png',
-    'VZB0016': '/paineis_hd/03_bmw/VZB0016_bmw_r1200gs_2018-2019.png',
-    'VZB0017': '/paineis_hd/03_bmw/VZB0017_bmw_f750gs_premium_2018-2019.png',
-    'VZB0018': '/paineis_hd/03_bmw/VZB0018_bmw_c400x.png',
-    'VZB0019': '/paineis_hd/03_bmw/VZB0019_bmw_f800gs.png',
-    'VZB0020': '/paineis_hd/03_bmw/VZB0020_bmw_r1250rt.png',
-    'VZB0021': '/paineis_hd/03_bmw/VZB0021_bmw_g650gs_sertao_2012-2016.png',
-    'VZB0022': '/paineis_hd/03_bmw/VZB0022_bmw_g310r_2018-2024plus.png',
-    'VZB0023': '/paineis_hd/03_bmw/VZB0023_bmw_f750gs_2019-2022.png',
-    'VZB0024': '/paineis_hd/03_bmw/VZB0024_bmw_r1200_nine_t_2014-2015.png',
-    'VZB0025': '/paineis_hd/02_dafra/VZB0025_dafra_cruisym_150.png',
-    'VZB0026': '/paineis_hd/02_dafra/VZB0026_dafra_nh_300.png',
-    'VZB0027': '/paineis_hd/02_dafra/VZB0027_dafra_nhx_190_2025.png',
-    'VZB0028': '/paineis_hd/02_dafra/VZB0028_dafra_nh_190_2020-2025.png',
-    'VZB0029': '/paineis_hd/04_ducati/VZB0029_ducati_multistrada_v4s_2021plus.png',
-    'VZB0030': '/paineis_hd/04_ducati/VZB0030_ducati_multistrada_1260_1260s_2018-2023.png',
-    'VZB0031': '/paineis_hd/04_ducati/VZB0031_ducati_panigale_v4r_v4s_diavel_2021plus.png',
-    'VZB0032': '/paineis_hd/04_ducati/VZB0032_ducati_streetfighter_v4s_2021plus.png',
-    'VZB0033': '/paineis_hd/04_ducati/VZB0033_ducati_scrambler_2016-2024.png',
-    'VZB0034': '/paineis_hd/04_ducati/VZB0034_ducati_desert_x_2020plus.png',
-    'VZB0035': '/paineis_hd/05_haojue/VZB0035_haojue_dl160_2025plus.png',
-    'VZB0036': '/paineis_hd/05_haojue/VZB0036_haojue_dr160_2020-2023.png',
-    'VZB0037': '/paineis_hd/05_haojue/VZB0037_haojue_dk160_2023-2025.png',
-    'VZB0038': '/paineis_hd/05_haojue/VZB0038_haojue_dk150_2018-2025.png',
-    'VZB0039': '/paineis_hd/06_harley_davidson/VZB0039_harley_davidson_sportster_s_2021-2025.png',
-    'VZB0040': '/paineis_hd/06_harley_davidson/VZB0040_harley_davidson_sportster_xl1200_2008-2020.png',
-    'VZB0041': '/paineis_hd/06_harley_davidson/VZB0041_harley_davidson_pan_america_1250_2022-2025.png',
-    'VZB0042': '/paineis_hd/06_harley_davidson/VZB0042_harley_davidson_sportsterxl_883_2008-2020.png',
-    'VZB0043': '/paineis_hd/08_honda/VZB0043_honda_cb300f_twister_2023plus.png',
-    'VZB0044': '/paineis_hd/08_honda/VZB0044_honda_xre300_sahara_2023plus.png',
-    'VZB0045': '/paineis_hd/08_honda/VZB0045_honda_biz125_2025plus.png',
-    'VZB0046': '/paineis_hd/08_honda/VZB0046_honda_adv160_2025plus.png',
-    'VZB0047': '/paineis_hd/08_honda/VZB0047_honda_xre190_2025plus.png',
-    'VZB0048': '/paineis_hd/08_honda/VZB0048_honda_xr300l_tornado300_2025plus.png',
-    'VZB0049': '/paineis_hd/08_honda/VZB0049_honda_cg160_titan_fan_start_cargo_2025plus.png',
-    'VZB0050': '/paineis_hd/08_honda/VZB0050_honda_pcx160_2023-2025.png',
-    'VZB0051': '/paineis_hd/08_honda/VZB0051_honda_cb500x_2020-2024.png',
-    'VZB0052': '/paineis_hd/08_honda/VZB0052_honda_nc750x_2022-2025.png',
-    'VZB0053': '/paineis_hd/08_honda/VZB0053_honda_cb_twister_250_2016-2022.png',
-    'VZB0054': '/paineis_hd/08_honda/VZB0054_honda_nxr160_bros_2025plus.png',
-    'VZB0055': '/paineis_hd/08_honda/VZB0055_honda_crf1100l_africa_twin_2021-2024plus.png',
-    'VZB0056': '/paineis_hd/08_honda/VZB0056_honda_cb650r_2020-2024.png',
-    'VZB0057': '/paineis_hd/08_honda/VZB0057_honda_cb1000r_2023.png',
-    'VZB0058': '/paineis_hd/08_honda/VZB0058_honda_cb500f_2020-2024.png',
-    'VZB0059': '/paineis_hd/08_honda/VZB0059_honda_adv150_2024plus.png',
-    'VZB0060': '/paineis_hd/08_honda/VZB0060_honda_xre300_2018-2023.png',
-    'VZB0061': '/paineis_hd/08_honda/VZB0061_honda_biz125_2018-2023.png',
-    'VZB0062': '/paineis_hd/08_honda/VZB0062_honda_nc750x_2016-2021.png',
-    'VZB0063': '/paineis_hd/08_honda/VZB0063_honda_cg160_titan_2022-2023.png',
-    'VZB0064': '/paineis_hd/08_honda/VZB0064_honda_nxr160_bros_2016-2023.png',
-    'VZB0065': '/paineis_hd/08_honda/VZB0065_honda_sh150i_2017-2021.png',
-    'VZB0066': '/paineis_hd/08_honda/VZB0066_honda_cg160_titan_fan_2016-2021.png',
-    'VZB0067': '/paineis_hd/08_honda/VZB0067_honda_xre190_2016-2024.png',
-    'VZB0068': '/paineis_hd/08_honda/VZB0068_honda_biz110i_2018-2023.png',
-    'VZB0069': '/paineis_hd/08_honda/VZB0069_honda_nx500_2025plus.png',
-    'VZB0070': '/paineis_hd/08_honda/VZB0070_honda_pop110i_2016-2025.png',
-    'VZB0071': '/paineis_hd/08_honda/VZB0071_honda_cb500x_2025.png',
-    'VZB0072': '/paineis_hd/08_honda/VZB0072_honda_elite_2025.png',
-    'VZB0073': '/paineis_hd/08_honda/VZB0073_honda_pcx150_2019-2022.png',
-    'VZB0074': '/paineis_hd/08_honda/VZB0074_honda_elite_2018-2024.png',
-    'VZB0075': '/paineis_hd/08_honda/VZB0075_honda_cbr650r_2020-2024.png',
-    'VZB0076': '/paineis_hd/08_honda/VZB0076_honda_cb500f_2014-2019.png',
-    'VZB0077': '/paineis_hd/08_honda/VZB0077_honda_cg160_start_2021-2025.png',
-    'VZB0079': '/paineis_hd/08_honda/VZB0079_honda_hornet500_2025.png',
-    'VZB0081': '/paineis_hd/08_honda/VZB0081_honda_cbr1000rr_2017-2020.png',
-    'VZB0083': '/paineis_hd/08_honda/VZB0083_honda_crf1000l_africa_twin_2017-2019.png',
-    'VZB0084': '/paineis_hd/08_honda/VZB0084_honda_x_adv750_2024plus.png',
-    'VZB0085': '/paineis_hd/08_honda/VZB0085_honda_transalp750_2025.png',
-    'VZB0086': '/paineis_hd/08_honda/VZB0086_honda_crf1000l_africa_twin_2020.png',
-    'VZB0087': '/paineis_hd/08_honda/VZB0087_honda_cbr500f_2014-2019.png',
-    'VZB0088': '/paineis_hd/09_kawasaki/VZB0088_kawasaki_z900_2026.png',
-    'VZB0089': '/paineis_hd/09_kawasaki/VZB0089_kawasaki_versys650_2022-2025.png',
-    'VZB0090': '/paineis_hd/09_kawasaki/VZB0090_kawasaki_z900_2020-2024.png',
-    'VZB0091': '/paineis_hd/09_kawasaki/VZB0091_kawasaki_versys_x300_2017-2025.png',
-    'VZB0092': '/paineis_hd/09_kawasaki/VZB0092_kawasaki_z650rs_2020-2025.png',
-    'VZB0093': '/paineis_hd/09_kawasaki/VZB0093_kawasaki_z650_2020-2025.png',
-    'VZB0094': '/paineis_hd/09_kawasaki/VZB0094_kawasaki_versys1000_2019plus.png',
-    'VZB0095': '/paineis_hd/09_kawasaki/VZB0095_kawasaki_vulcan_s_2015-2023.png',
-    'VZB0096': '/paineis_hd/09_kawasaki/VZB0096_kawasaki_ninja_zx10r_2020-2025.png',
-    'VZB0097': '/paineis_hd/09_kawasaki/VZB0097_kawasaki_eliminator500_2025.png',
-    'VZB0098': '/paineis_hd/09_kawasaki/VZB0098_kawasaki_z900rs_2019-2025.png',
-    'VZB0099': '/paineis_hd/09_kawasaki/VZB0099_kawasaki_z400_2020-2025.png',
-    'VZB0100': '/paineis_hd/09_kawasaki/VZB0100_kawasaki_ninja_zx6r_2018-2020.png',
-    'VZB0101': '/paineis_hd/09_kawasaki/VZB0101_kawasaki_z500se_2025.png',
-    'VZB0102': '/paineis_hd/09_kawasaki/VZB0102_kawasaki_ninja400_2019-2023.png',
-    'VZB0103': '/paineis_hd/09_kawasaki/VZB0103_kawasaki_z_h2_2025.png',
-    'VZB0104': '/paineis_hd/09_kawasaki/VZB0104_kawasaki_ninja650_2020-2025.png',
-    'VZB0105': '/paineis_hd/09_kawasaki/VZB0105_kawasaki_z1000_2014-2017.png',
-    'VZB0106': '/paineis_hd/09_kawasaki/VZB0106_kawasaki_z900_2017-2019.png',
-    'VZB0107': '/paineis_hd/09_kawasaki/VZB0107_kawasaki_z650_2018-2020.png',
-    'VZB0108': '/paineis_hd/09_kawasaki/VZB0108_kawasaki_z500_2025.png',
-    'VZB0109': '/paineis_hd/09_kawasaki/VZB0109_kawasaki_ninja500_2025.png',
-    'VZB0110': '/paineis_hd/09_kawasaki/VZB0110_kawasaki_ninja300_2013-2025.png',
-    'VZB0111': '/paineis_hd/09_kawasaki/VZB0111_kawasaki_ninja_zx4rr_2026.png',
-    'VZB0112': '/paineis_hd/09_kawasaki/VZB0112_kawasaki_ninja_zx4r_2024-2025.png',
-    'VZB0113': '/paineis_hd/09_kawasaki/VZB0113_kawasaki_ninja650_2018-2020.png',
-    'VZB0114': '/paineis_hd/09_kawasaki/VZB0114_kawasaki_z800_2013-2017.png',
-    'VZB0115': '/paineis_hd/10_ktm/VZB0115_ktm_duke_390_2018-2023.png',
-    'VZB0116': '/paineis_hd/10_ktm/VZB0116_ktm_990_adventure_2009-2011.png',
-    'VZB0117': '/paineis_hd/10_ktm/VZB0117_ktm_890_adventure_2021-2023.png',
-    'VZB0118': '/paineis_hd/10_ktm/VZB0118_ktm_super_adventure_1290_2017-2019.png',
-    'VZB0119': '/paineis_hd/10_ktm/VZB0119_ktm_1190_adventure_2014-2016.png',
-    'VZB0120': '/paineis_hd/12_royal_enfield/VZB0120_royal_enfield_himalayan_450_2025.png',
-    'VZB0121': '/paineis_hd/12_royal_enfield/VZB0121_royal_enfield_meteor350_scram411_2022-2025.png',
-    'VZB0122': '/paineis_hd/12_royal_enfield/VZB0122_royal_enfield_hunter350_2022-2025.png',
-    'VZB0123': '/paineis_hd/12_royal_enfield/VZB0123_royal_enfield_super_meteor650_2024plus.png',
-    'VZB0124': '/paineis_hd/12_royal_enfield/VZB0124_royal_enfield_interceptor650_2019-2023.png',
-    'VZB0125': '/paineis_hd/12_royal_enfield/VZB0125_royal_enfield_shotgun650_2025plus.png',
-    'VZB0126': '/paineis_hd/12_royal_enfield/VZB0126_royal_enfield_himalayan400_2022-2023.png',
-    'VZB0127': '/paineis_hd/12_royal_enfield/VZB0127_royal_enfield_himalayan400_sleet_2018-2021.png',
-    'VZB0128': '/paineis_hd/12_royal_enfield/VZB0128_royal_enfield_guerrilla450_2025plus.png',
-    'VZB0129': '/paineis_hd/12_royal_enfield/VZB0129_royal_enfield_continental_gt650_2019-2023.png',
-    'VZB0130': '/paineis_hd/12_royal_enfield/VZB0130_royal_enfield_bear650_2024plus.png',
-    'VZB0131': '/paineis_hd/13_suzuki/VZB0131_suzuki_v-strom_650_650xt_2017-2025.png',
-    'VZB0132': '/paineis_hd/13_suzuki/VZB0132_suzuki_v-strom_800_2024-2025.png',
-    'VZB0133': '/paineis_hd/13_suzuki/VZB0133_suzuki_v-strom_1050xt_2021-2024.png',
-    'VZB0134': '/paineis_hd/13_suzuki/VZB0134_suzuki_gsx-8s_2025plus.png',
-    'VZB0135': '/paineis_hd/13_suzuki/VZB0135_suzuki_v-strom_1000_1000xt_2015-2021.png',
-    'VZB0136': '/paineis_hd/13_suzuki/VZB0136_suzuki_gsx-s750_2018-2025.png',
-    'VZB0137': '/paineis_hd/13_suzuki/VZB0137_suzuki_gsx-r1000_1000r_2017-2023.png',
-    'VZB0138': '/paineis_hd/13_suzuki/VZB0138_suzuki_v-strom_1050_1050xt_2024-2025.png',
-    'VZB0139': '/paineis_hd/13_suzuki/VZB0139_suzuki_gsx-s1000_1000a_2021-2023.png',
-    'VZB0140': '/paineis_hd/13_suzuki/VZB0140_suzuki_gsx-s1000_1000f_2016-2020.png',
-    'VZB0141': '/paineis_hd/13_suzuki/VZB0141_suzuki_gsx-s1000_2025.png',
-    'VZB0142': '/paineis_hd/13_suzuki/VZB0142_suzuki_gsx-s1000_gt_2024-2025.png',
-    'VZB0143': '/paineis_hd/14_triumph/VZB0143_triumph_tiger900_2024-2025.png',
-    'VZB0144': '/paineis_hd/14_triumph/VZB0144_triumph_tiger1200_2022-2025.png',
-    'VZB0145': '/paineis_hd/14_triumph/VZB0145_triumph_tiger900_2020-2023_7pol.png',
-    'VZB0146': '/paineis_hd/14_triumph/VZB0146_triumph_scrambler400x_2024-2025.png',
-    'VZB0147': '/paineis_hd/14_triumph/VZB0147_triumph_speed_2024-2025.png',
-    'VZB0148': '/paineis_hd/14_triumph/VZB0148_triumph_tiger800_2018-2020.png',
-    'VZB0149': '/paineis_hd/14_triumph/VZB0149_triumph_street_triple765_2017-2025.png',
-    'VZB0150': '/paineis_hd/14_triumph/VZB0150_triumph_trident660_2021-2023.png',
-    'VZB0151': '/paineis_hd/14_triumph/VZB0151_triumph_tiger_sport660_2023-2025.png',
-    'VZB0152': '/paineis_hd/14_triumph/VZB0152_triumph_scrambler1200x_2023plus.png',
-    'VZB0153': '/paineis_hd/14_triumph/VZB0153_triumph_tiger1200_2018-2021.png',
-    'VZB0154': '/paineis_hd/14_triumph/VZB0154_triumph_speed_twin900_2013-2017.png',
-    'VZB0155': '/paineis_hd/14_triumph/VZB0155_triumph_speed_triple_1050_1050r_2022-2023.png',
-    'VZB0156': '/paineis_hd/14_triumph/VZB0156_triumph_tiger1050_sport_2014-2018.png',
-    'VZB0157': '/paineis_hd/14_triumph/VZB0157_triumph_street_triple_675_675r_2013-2017.png',
-    'VZB0158': '/paineis_hd/14_triumph/VZB0158_triumph_bonneville_bobber_2017-2023.png',
-    'VZB0159': '/paineis_hd/14_triumph/VZB0159_triumph_street_scrambler_2017-2023.png',
-    'VZB0160': '/paineis_hd/14_triumph/VZB0160_triumph_daytona_675i_675r_2012-2016.png',
-    'VZB0161': '/paineis_hd/07_voltz/VZB0161_voltz_evs_2021-2023.png',
-    'VZB0162': '/paineis_hd/07_voltz/VZB0162_voltz_ev1_sport_2021-2023.png',
-    'VZB0164': '/paineis_hd/16_yamaha/VZB0164_yamaha_xmax_connected_2025.png',
-    'VZB0165': '/paineis_hd/16_yamaha/VZB0165_yamaha_mt-03_2021-2026.png',
-    'VZB0166': '/paineis_hd/16_yamaha/VZB0166_yamaha_lander_connected_2025.png',
-    'VZB0167': '/paineis_hd/16_yamaha/VZB0167_yamaha_xtz_crosser150_2022-2025.png',
-    'VZB0168': '/paineis_hd/16_yamaha/VZB0168_yamaha_lander250_xtz250_2019-2024.png',
-    'VZB0169': '/paineis_hd/16_yamaha/VZB0169_yamaha_nmax_abs_connected_2025.png',
-    'VZB0170': '/paineis_hd/16_yamaha/VZB0170_yamaha_fz15_2022-2025.png',
-    'VZB0171': '/paineis_hd/16_yamaha/VZB0171_yamaha_fazer_fz25_2018-2024.png',
-    'VZB0172': '/paineis_hd/16_yamaha/VZB0172_yamaha_fazer_fz25_connected_2025.png',
-    'VZB0173': '/paineis_hd/16_yamaha/VZB0173_yamaha_factor_dx_2025.png',
-    'VZB0174': '/paineis_hd/16_yamaha/VZB0174_yamaha_nmax160_2020-2024.png',
-    'VZB0175': '/paineis_hd/16_yamaha/VZB0175_yamaha_mt-07_2014-2024.png',
-    'VZB0176': '/paineis_hd/16_yamaha/VZB0176_yamaha_tracer900_gt_2019-2025.png',
-    'VZB0177': '/paineis_hd/16_yamaha/VZB0177_yamaha_mt-09_2015-2024.png',
-    'VZB0178': '/paineis_hd/16_yamaha/VZB0178_yamaha_yzf-r15_abs_2023-2025.png',
-    'VZB0179': '/paineis_hd/16_yamaha/VZB0179_yamaha_factor150i_2016-2024.png',
-    'VZB0180': '/paineis_hd/16_yamaha/VZB0180_yamaha_fluo125_2022-2024.png',
-    'VZB0181': '/paineis_hd/16_yamaha/VZB0181_yamaha_yzf-r3_2021-2025.png',
-    'VZB0182': '/paineis_hd/16_yamaha/VZB0182_yamaha_fazer250_2011-2015.png',
-    'VZB0183': '/paineis_hd/16_yamaha/VZB0183_yamaha_fazer150_ubs_2014-2023.png',
-    'VZB0184': '/paineis_hd/16_yamaha/VZB0184_yamaha_nova_mt-07_connected_2025.png',
-    'VZB0185': '/paineis_hd/16_yamaha/VZB0185_yamaha_crosser150_2014-2022.png',
-    'VZB0186': '/paineis_hd/16_yamaha/VZB0186_yamaha_xtz_lander250_2017-2018.png',
-    'VZB0187': '/paineis_hd/16_yamaha/VZB0187_yamaha_xt1200z_super_tenere_2016-2020.png',
-    'VZB0188': '/paineis_hd/16_yamaha/VZB0188_yamaha_mt-03_2017-2020.png',
-    'VZB0189': '/paineis_hd/16_yamaha/VZB0189_yamaha_nova_fluo125_2025.png',
-    'VZB0190': '/paineis_hd/16_yamaha/VZB0190_yamaha_xtz250_tenere_2011-2015.png',
-    'VZB0191': '/paineis_hd/16_yamaha/VZB0191_yamaha_factor125i_2016-2024.png',
-    'VZB0192': '/paineis_hd/16_yamaha/VZB0192_yamaha_yzf-r3_2017-2020.png',
-    'VZB0193': '/paineis_hd/16_yamaha/VZB0193_yamaha_xj6n_xj6f_2010-2019.png',
-    'VZB0194': '/paineis_hd/16_yamaha/VZB0194_yamaha_tenere250_xt250z_2016-2019.png',
-    'VZB0195': '/paineis_hd/16_yamaha/VZB0195_yamaha_mt-09_tracer900_2017-2018.png',
-    'VZB0196': '/paineis_hd/16_yamaha/VZB0196_yamaha_fz6n_2008-2009.png',
-    'VZB0197': '/paineis_hd/16_yamaha/VZB0197_yamaha_fazer250_fz25_2016-2017.png',
-    'VZB0198': '/paineis_hd/16_yamaha/VZB0198_yamaha_tenere660_2008-2016.png',
-    'VZB0199': '/paineis_hd/16_yamaha/VZB0199_yamaha_yzf-r1_yzf-r1m_2015-2016.png',
-    'VZB0200': '/paineis_hd/16_yamaha/VZB0200_yamaha_fazer600_fz6s_2005-2009.png',
-    'VZB0201': '/paineis_hd/16_yamaha/VZB0201_yamaha_yzf-r1_2009-2014.png',
-    'VZB0202': '/paineis_hd/11_zontes/VZB0202_zontes_t350_r350_v350_s350_2018plus.png',
-    'VZB0203': '/paineis_hd/11_zontes/VZB0203_zontes_max_scooter_350e_2024plus.png',
-    'VZB0204': '/paineis_hd/11_zontes/VZB0204_zontes_310v_310t_310r_2022-2025.png',
-    'VZB0205': '/paineis_hd/15_shineray/VZB0205_shineray_urban150_2025.png',
-    'VZB0206': '/paineis_hd/15_shineray/VZB0206_shineray_flash250f_2025.png',
-    'VZB0207': '/paineis_hd/15_shineray/VZB0207_shineray_storm200_2025.png',
-    'VZB0208': '/paineis_hd/15_shineray/VZB0208_shineray_shi250_2025.png',
-    'VZB0209': '/paineis_hd/15_shineray/VZB0209_shineray_shi175_2025.png',
-    'VZB0210': '/paineis_hd/15_shineray/VZB0210_shineray_rio125_2025.png',
-    'VZB0211': '/paineis_hd/15_shineray/VZB0211_shineray_denver250_2025.png',
-  };
+<script define:vars={{ catalogJSON, imgMapJSON, labelsJSON }}>
+  const catalog = JSON.parse(catalogJSON);
+  const imgMap  = JSON.parse(imgMapJSON);
+  const brandLabels = JSON.parse(labelsJSON);
 
-  // ── Data ───────────────────────────────────────────────────────
-  const catalog: Record<string, {model: string, year: string, codeB: string, codeF: string}[]> = {
-    bajaj: [
-      { model: 'Dominar 400', year: '2023–2025', codeB: 'VZB0001', codeF: 'VZF0001' },
-      { model: 'Dominar 200', year: '2023–2025', codeB: 'VZB0002', codeF: 'VZF0002' },
-      { model: 'Dominar NS200', year: '2025', codeB: 'VZB0003', codeF: 'VZF0003' },
-      { model: 'Pulsar N150', year: '2025', codeB: 'VZB0004', codeF: 'VZF0004' },
-      { model: 'Dominar NS160', year: '2025', codeB: 'VZB0005', codeF: 'VZF0005' },
-      { model: 'Dominar 160', year: '2023–2025', codeB: 'VZB0006', codeF: 'VZF0006' },
-      { model: 'Dominar 250', year: '2025', codeB: 'VZB0007', codeF: 'VZF0007' },
-    ],
-    bmw: [
-      { model: 'R1250 GS / GS Adventure', year: '2019–2025', codeB: 'VZB0008', codeF: 'VZF0008' },
-      { model: 'F850 GS / GS Adventure', year: '2019–2025', codeB: 'VZB0009', codeF: 'VZF0009' },
-      { model: 'R1300 GS / GS Adventure', year: '2024+', codeB: 'VZB0010', codeF: 'VZF0010' },
-      { model: 'F900 R', year: '2019–2025', codeB: 'VZB0011', codeF: 'VZF0011' },
-      { model: 'S1000 RR', year: '2019–2025', codeB: 'VZB0012', codeF: 'VZF0012' },
-      { model: 'G310 GS', year: '2017–2024', codeB: 'VZB0013', codeF: 'VZF0013' },
-      { model: 'F900 GS', year: '2024+', codeB: 'VZB0014', codeF: 'VZF0014' },
-      { model: 'R1200 GS / GS Adventure', year: '2012–2018', codeB: 'VZB0015', codeF: 'VZF0015' },
-      { model: 'G310 R', year: '2018–2024+', codeB: 'VZB0022', codeF: 'VZF0022' },
-    ],
-    dafra: [
-      { model: 'Cruisym 150', year: '2022–2025', codeB: 'VZB0025', codeF: 'VZF0025' },
-      { model: 'NH 300', year: 'Todos os modelos', codeB: 'VZB0026', codeF: 'VZF0026' },
-      { model: 'NHX 190', year: '2025', codeB: 'VZB0027', codeF: 'VZF0027' },
-      { model: 'NH 190', year: '2020–2025', codeB: 'VZB0028', codeF: 'VZF0028' },
-    ],
-    ducati: [
-      { model: 'Multistrada V4S', year: '2021+', codeB: 'VZB0029', codeF: 'VZF0029' },
-      { model: 'Multistrada 1260 / 1260 S', year: '2018–2023', codeB: 'VZB0030', codeF: 'VZF0030' },
-      { model: 'Panigale V4 R / V4 S / Diavel', year: '2021+', codeB: 'VZB0031', codeF: 'VZF0031' },
-      { model: 'Streetfighter V4 S', year: '2021+', codeB: 'VZB0032', codeF: 'VZF0032' },
-      { model: 'Scrambler', year: '2016–2024', codeB: 'VZB0033', codeF: 'VZF0033' },
-      { model: 'Desert X', year: '2020+', codeB: 'VZB0034', codeF: 'VZF0034' },
-    ],
-    haojue: [
-      { model: 'DL 160 2025', year: '2025+', codeB: 'VZB0035', codeF: 'VZF0035' },
-      { model: 'DR160', year: '2020–2023', codeB: 'VZB0036', codeF: 'VZF0036' },
-      { model: 'DK160', year: '2023–2025', codeB: 'VZB0037', codeF: 'VZF0037' },
-      { model: 'DK150', year: '2018–2025', codeB: 'VZB0038', codeF: 'VZF0038' },
-    ],
-    harley: [
-      { model: 'Sportster S', year: '2021–2025', codeB: 'VZB0039', codeF: 'VZF0039' },
-      { model: 'Sportster XL 1200', year: '2008–2020', codeB: 'VZB0040', codeF: 'VZF0040' },
-      { model: 'Pan America 1250', year: '2022–2025', codeB: 'VZB0041', codeF: 'VZF0041' },
-      { model: 'Sportster XL 883', year: '2008–2020', codeB: 'VZB0042', codeF: 'VZF0042' },
-    ],
-    honda: [
-      { model: 'CB 300F Twister', year: '2023+', codeB: 'VZB0043', codeF: 'VZF0043' },
-      { model: 'XRE 300 Sahara', year: '2023+', codeB: 'VZB0044', codeF: 'VZF0044' },
-      { model: 'CRF1100L Africa Twin', year: '2021–2024+', codeB: 'VZB0055', codeF: 'VZF0055' },
-      { model: 'CB650R', year: '2020–2024', codeB: 'VZB0056', codeF: 'VZF0056' },
-      { model: 'CB500X', year: '2020–2024', codeB: 'VZB0051', codeF: 'VZF0051' },
-      { model: 'NC750X', year: '2022–2025', codeB: 'VZB0052', codeF: 'VZF0052' },
-      { model: 'PCX 160', year: '2023–2025', codeB: 'VZB0050', codeF: 'VZF0050' },
-      { model: 'ADV 160 2025', year: '2025+', codeB: 'VZB0046', codeF: 'VZF0046' },
-      { model: 'XRE 190 2025', year: '2025+', codeB: 'VZB0047', codeF: 'VZF0047' },
-      { model: 'Hornet 500 2025', year: '2025', codeB: 'VZB0079', codeF: 'VZF0079' },
-      { model: 'X-ADV 750', year: '2024+', codeB: 'VZB0084', codeF: 'VZF0084' },
-    ],
-    kawasaki: [
-      { model: 'Z900', year: '2020–2024', codeB: 'VZB0090', codeF: 'VZF0090' },
-      { model: 'Ninja ZX-10R', year: '2020–2025', codeB: 'VZB0096', codeF: 'VZF0096' },
-      { model: 'Versys 650', year: '2022–2025', codeB: 'VZB0089', codeF: 'VZF0089' },
-      { model: 'Z650RS', year: '2020–2025', codeB: 'VZB0092', codeF: 'VZF0092' },
-      { model: 'Ninja 650', year: '2020–2025', codeB: 'VZB0104', codeF: 'VZF0104' },
-      { model: 'Ninja 400', year: '2019–2023', codeB: 'VZB0102', codeF: 'VZF0102' },
-      { model: 'Ninja 500', year: '2025', codeB: 'VZB0109', codeF: 'VZF0109' },
-      { model: 'Z400', year: '2020–2025', codeB: 'VZB0099', codeF: 'VZF0099' },
-    ],
-    ktm: [
-      { model: 'Duke 390', year: '2018–2023', codeB: 'VZB0115', codeF: 'VZF0115' },
-      { model: '890 Adventure / 890R', year: '2021–2023', codeB: 'VZB0117', codeF: 'VZF0117' },
-      { model: 'Super Adventure 1290', year: '2017–2019', codeB: 'VZB0118', codeF: 'VZF0118' },
-      { model: '1190 Adventure / 1190R', year: '2014–2016', codeB: 'VZB0119', codeF: 'VZF0119' },
-    ],
-    royal_enfield: [
-      { model: 'Nova Himalayan 450', year: '2025', codeB: 'VZB0120', codeF: 'VZF0120' },
-      { model: 'Meteor 350 / Scram 411', year: '2022–2025', codeB: 'VZB0121', codeF: 'VZF0121' },
-      { model: 'Hunter 350', year: '2022–2025', codeB: 'VZB0122', codeF: 'VZF0122' },
-      { model: 'Super Meteor 650', year: '2024+', codeB: 'VZB0123', codeF: 'VZF0123' },
-      { model: 'Guerrilla 450', year: '2025+', codeB: 'VZB0128', codeF: 'VZF0128' },
-      { model: 'Bear 650', year: '2024+', codeB: 'VZB0130', codeF: 'VZF0130' },
-    ],
-    shineray: [
-      { model: 'Urban 150 2025', year: '2025', codeB: 'VZB0205', codeF: 'VZF0205' },
-      { model: 'Flash 250F 2025', year: '2025', codeB: 'VZB0206', codeF: 'VZF0206' },
-      { model: 'Storm 200', year: '2025', codeB: 'VZB0207', codeF: 'VZF0207' },
-      { model: 'Denver 250', year: '2025', codeB: 'VZB0211', codeF: 'VZF0211' },
-    ],
-    suzuki: [
-      { model: 'V-Strom 650/650XT', year: '2017–2025', codeB: 'VZB0131', codeF: 'VZF0131' },
-      { model: 'V-Strom 800', year: '2024–2025', codeB: 'VZB0132', codeF: 'VZF0132' },
-      { model: 'GSX-S 1000', year: '2021–2023', codeB: 'VZB0139', codeF: 'VZF0139' },
-      { model: 'GSX-S 750', year: '2018–2025', codeB: 'VZB0136', codeF: 'VZF0136' },
-      { model: 'GSX-S1000 2025', year: '2025', codeB: 'VZB0141', codeF: 'VZF0141' },
-    ],
-    triumph: [
-      { model: 'Tiger 900', year: '2024–2025', codeB: 'VZB0143', codeF: 'VZF0143' },
-      { model: 'Tiger 1200', year: '2022–2025', codeB: 'VZB0144', codeF: 'VZF0144' },
-      { model: 'Street Triple 765', year: '2017–2025', codeB: 'VZB0149', codeF: 'VZF0149' },
-      { model: 'Scrambler 400 X', year: '2024–2025', codeB: 'VZB0146', codeF: 'VZF0146' },
-      { model: 'Tiger Sport 660', year: '2023–2025', codeB: 'VZB0151', codeF: 'VZF0151' },
-      { model: 'Trident 660', year: '2021–2023', codeB: 'VZB0150', codeF: 'VZF0150' },
-    ],
-    voltz: [
-      { model: 'EVS', year: '2021–2023', codeB: 'VZB0161', codeF: 'VZF0161' },
-      { model: 'EV1 Sport', year: '2021–2023', codeB: 'VZB0162', codeF: 'VZF0162' },
-    ],
-    yamaha: [
-      { model: 'MT-03', year: '2021–2026', codeB: 'VZB0165', codeF: 'VZF0165' },
-      { model: 'MT-07', year: '2014–2024', codeB: 'VZB0175', codeF: 'VZF0175' },
-      { model: 'MT-09', year: '2015–2024', codeB: 'VZB0177', codeF: 'VZF0177' },
-      { model: 'Fazer FZ-25', year: '2018–2024', codeB: 'VZB0171', codeF: 'VZF0171' },
-      { model: 'XMAX Connected', year: '2025', codeB: 'VZB0164', codeF: 'VZF0164' },
-      { model: 'YZF-R3', year: '2021–2025', codeB: 'VZB0181', codeF: 'VZF0181' },
-      { model: 'Tracer 900 GT', year: '2019–2025', codeB: 'VZB0176', codeF: 'VZF0176' },
-      { model: 'Nova MT-07 Connected', year: '2025', codeB: 'VZB0184', codeF: 'VZF0184' },
-      { model: 'Lander Connected', year: '2025', codeB: 'VZB0166', codeF: 'VZF0166' },
-    ],
-    zontes: [
-      { model: 'T 350 / R 350 / V 350', year: '2018+', codeB: 'VZB0202', codeF: 'VZF0202' },
-      { model: 'Max Scooter 350E', year: '2024+', codeB: 'VZB0203', codeF: 'VZF0203' },
-      { model: '310V / 310T / 310R', year: '2022–2025', codeB: 'VZB0204', codeF: 'VZF0204' },
-    ],
-  };
+  const brandSelect = document.getElementById('select-brand');
+  const modelSelect = document.getElementById('select-model');
+  const yearSelect  = document.getElementById('select-year');
+  const btnSearch   = document.getElementById('btn-search');
+  const resultsEl   = document.getElementById('finder-results');
+  const popularEl   = document.getElementById('finder-popular');
+  const step1 = document.getElementById('step-1');
+  const step2 = document.getElementById('step-2');
+  const step3 = document.getElementById('step-3');
 
-  const brandSelect  = document.getElementById('select-brand') as HTMLSelectElement;
-  const modelSelect  = document.getElementById('select-model') as HTMLSelectElement;
-  const yearSelect   = document.getElementById('select-year') as HTMLSelectElement;
-  const btnSearch    = document.getElementById('btn-search') as HTMLButtonElement;
-  const resultsEl    = document.getElementById('finder-results') as HTMLDivElement;
-  const popularEl    = document.getElementById('finder-popular') as HTMLDivElement;
-  const step1        = document.getElementById('step-1');
-  const step2        = document.getElementById('step-2');
-  const step3        = document.getElementById('step-3');
-
-  function setStep(n: number) {
+  function setStep(n) {
     step1?.setAttribute('data-active', n >= 1 ? 'true' : 'false');
     step2?.setAttribute('data-active', n >= 2 ? 'true' : 'false');
     step3?.setAttribute('data-active', n >= 3 ? 'true' : 'false');
   }
 
+  function hideResults() {
+    resultsEl.classList.remove('visible');
+    resultsEl.innerHTML = '';
+    popularEl.style.display = '';
+  }
+
   brandSelect.addEventListener('change', () => {
     const brand = brandSelect.value;
-    // Reset downstream
     modelSelect.innerHTML = '<option value="">Selecione o modelo</option>';
     yearSelect.innerHTML  = '<option value="">Selecione o ano</option>';
     modelSelect.disabled  = true;
     yearSelect.disabled   = true;
-    btnSearch.disabled    = true;
     hideResults();
-
-    if (!brand) { setStep(1); return; }
+    if (!brand) { setStep(1); btnSearch.disabled = true; return; }
     setStep(2);
-
-    const products = catalog[brand] || [];
-    const models = [...new Set(products.map(p => p.model))];
+    const models = [...new Set((catalog[brand] || []).map(p => p.model))];
     models.forEach(m => {
       const opt = document.createElement('option');
-      opt.value = m;
-      opt.textContent = m;
+      opt.value = m; opt.textContent = m;
       modelSelect.appendChild(opt);
     });
     modelSelect.disabled = false;
+    btnSearch.disabled = false;
   });
 
   modelSelect.addEventListener('change', () => {
@@ -950,25 +630,20 @@
     const model = modelSelect.value;
     yearSelect.innerHTML = '<option value="">Selecione o ano</option>';
     yearSelect.disabled  = true;
-    btnSearch.disabled   = true;
     hideResults();
-
     if (!model) { setStep(2); return; }
     setStep(3);
-
-    const products = (catalog[brand] || []).filter(p => p.model === model);
-    const years = [...new Set(products.map(p => p.year))];
+    const years = [...new Set((catalog[brand] || []).filter(p => p.model === model).map(p => p.year))];
     years.forEach(y => {
       const opt = document.createElement('option');
-      opt.value = y;
-      opt.textContent = y;
+      opt.value = y; opt.textContent = y;
       yearSelect.appendChild(opt);
     });
     yearSelect.disabled = false;
   });
 
   yearSelect.addEventListener('change', () => {
-    btnSearch.disabled = !yearSelect.value;
+    // ano é opcional — botão já habilitado desde a marca
   });
 
   document.getElementById('finder-form')?.addEventListener('submit', e => {
@@ -980,40 +655,35 @@
     const brand = brandSelect.value;
     const model = modelSelect.value;
     const year  = yearSelect.value;
+    if (!brand) return;
 
-    if (!brand || !model || !year) return;
-
-    const results = (catalog[brand] || []).filter(
-      p => p.model === model && p.year === year
-    );
-
+    let results = catalog[brand] || [];
+    if (model) results = results.filter(p => p.model === model);
+    if (year)  results = results.filter(p => p.year === year);
     popularEl.style.display = 'none';
     resultsEl.classList.add('visible');
 
-    if (results.length === 0) {
-      resultsEl.innerHTML = `
-        <div class="finder__result-empty">
-          Nenhum produto encontrado para este modelo. Entre em contato conosco.
-        </div>`;
+    if (!results.length) {
+      resultsEl.innerHTML = `<div class="finder__result-empty">Nenhum produto encontrado para este modelo. Entre em contato conosco.</div>`;
       return;
     }
 
+    const brandLabel = brandLabels[brand] || brand;
     resultsEl.innerHTML = `
       <div class="finder__result-title"></div>
-      <div class="finder__results-grid">
+      <div style="display:flex;flex-direction:column;gap:12px;margin-top:16px;">
         ${results.map(r => {
           const imgSrc = imgMap[r.codeB] || '';
-          const imgHtml = imgSrc
-            ? `<div class="finder__result-img-wrap"><img src="${imgSrc}" alt="${r.model}" class="finder__result-img" loading="lazy" decoding="async" /></div>`
-            : '';
           const productUrl = `https://vizorpeliculas.com.br/produto/${r.codeB}`;
           const wppMsg = `Olá! Vi esse produto no site da Vizor Películas e tenho interesse:\n\n*${r.model}* (${r.year})\nCódigo: ${r.codeB}\n\n🔗 ${productUrl}`;
           const wppUrl = `https://wa.me/5551980230392?text=${encodeURIComponent(wppMsg)}`;
           return `
-          <div class="finder__result-card" style="display:grid;grid-template-columns:minmax(0,160px) minmax(0,1fr);border:1px solid #e8edf2;border-radius:10px;overflow:hidden;background:#fff;">
-            ${imgSrc ? `<div style="background:#f0f4f8;display:flex;align-items:center;justify-content:center;padding:20px 16px;min-height:160px;border-right:1px solid #e8edf2;overflow:hidden;"><img src="${imgSrc}" alt="${r.model}" style="width:128px;height:128px;object-fit:contain;display:block;" loading="lazy" decoding="async" /></div>` : ''}
+          <div style="display:grid;grid-template-columns:${imgSrc ? 'minmax(0,160px) ' : ''}minmax(0,1fr);border:1px solid #e8edf2;border-radius:10px;overflow:hidden;background:#fff;transition:box-shadow 0.2s,border-color 0.2s;"
+               onmouseover="this.style.borderColor='#b3d4f5';this.style.boxShadow='0 4px 20px rgba(10,46,74,0.08)'"
+               onmouseout="this.style.borderColor='#e8edf2';this.style.boxShadow='none'">
+            ${imgSrc ? `<div style="background:#f0f4f8;display:flex;align-items:center;justify-content:center;padding:20px 16px;min-height:160px;border-right:1px solid #e8edf2;overflow:hidden;max-width:160px;"><img src="${imgSrc}" alt="${r.model}" style="width:128px;height:128px;object-fit:contain;display:block;flex-shrink:0;" loading="lazy" decoding="async" /></div>` : ''}
             <div style="padding:20px 24px;display:flex;flex-direction:column;justify-content:center;gap:0;min-width:0;">
-              <div style="font-weight:700;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:#2a7cc7;margin-bottom:4px;">${brandSelect.options[brandSelect.selectedIndex].text}</div>
+              <div style="font-weight:700;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:#2a7cc7;margin-bottom:2px;">${brandLabel}</div>
               <div style="font-weight:700;font-size:18px;color:#0d1f2d;line-height:1.2;margin:0 0 2px;">${r.model}</div>
               ${r.year ? `<div style="font-size:13px;color:#9aa5b0;margin-bottom:10px;">${r.year}</div>` : ''}
               <div style="height:1px;background:#e8edf2;margin:8px 0 12px;"></div>
@@ -1041,32 +711,23 @@
       </div>`;
   }
 
-  function hideResults() {
-    resultsEl.classList.remove('visible');
-    resultsEl.innerHTML = '';
-    popularEl.style.display = '';
-  }
-
-  // Quick-search tags
   document.querySelectorAll('.finder__tag').forEach(tag => {
     tag.addEventListener('click', () => {
-      const btn = tag as HTMLElement;
-      const brand = btn.dataset.brand || '';
-      const model = btn.dataset.model || '';
-      const year  = btn.dataset.year  || '';
+      const brand = tag.dataset.brand || '';
+      const model = tag.dataset.model || '';
+      const year  = tag.dataset.year  || '';
 
       brandSelect.value = brand;
       brandSelect.dispatchEvent(new Event('change'));
 
       setTimeout(() => {
-        // Find closest model match
         const opts = Array.from(modelSelect.options);
         const match = opts.find(o => o.value === model || o.value.includes(model.split(' ')[0]));
         if (match) { modelSelect.value = match.value; modelSelect.dispatchEvent(new Event('change')); }
 
         setTimeout(() => {
-          const yearOpts = Array.from(yearSelect.options);
-          const yMatch = yearOpts.find(o => o.value.includes(year));
+          const yOpts = Array.from(yearSelect.options);
+          const yMatch = yOpts.find(o => o.value === year || o.value.includes(year.split('–')[0]));
           if (yMatch) { yearSelect.value = yMatch.value; btnSearch.disabled = false; }
         }, 50);
       }, 50);
