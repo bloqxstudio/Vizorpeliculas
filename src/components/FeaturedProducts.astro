@@ -14,8 +14,8 @@ const BUCKET_URL = 'https://bbrxcoxuzulieywudotl.supabase.co/storage/v1/object/p
 
 const allProducts = (data ?? []).map(p => ({
   ...p,
-  codeB: `VZB0${p.num}`,
-  codeF: `VZF0${p.num}`,
+  codeB: p.code_b,
+  codeF: p.code_f,
   imgPath: p.image_url ?? `${BUCKET_URL}/${p.folder}/${p.file}`,
 }));
 
@@ -29,7 +29,7 @@ const brands = ['Todas', ...new Set(allProducts.map(p => p.brand))];
     <!-- Header -->
     <div class="catalog__header">
       <div class="catalog__header-left">
-        <p class="vz-overline">Catálogo 2025</p>
+        <p class="vz-overline">Catálogo 2026</p>
         <h2 id="catalog-title" class="catalog__title">
           Película Protetora Painel
         </h2>

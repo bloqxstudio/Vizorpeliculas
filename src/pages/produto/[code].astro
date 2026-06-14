@@ -2,34 +2,33 @@
 import { supabase } from '../../lib/supabase';
 
 export async function getStaticPaths() {
-  const { data } = await supabase.from('products').select('num, brand, model, year, folder, file, image_url');
+  const { data } = await supabase.from('products').select('num, brand, model, year, code_b, code_f, folder, file, image_url');
   if (!data) return [];
 
   const BUCKET_URL = 'https://bbrxcoxuzulieywudotl.supabase.co/storage/v1/object/public/products-images';
 
+  // Uma rota por MOTO (identificada pelo num). O código se repete entre motos
+  // compatíveis, então não pode ser o parâmetro da rota — usamos num.
   const paths = [];
   for (const p of data) {
     const imgPath = p.image_url ?? `${BUCKET_URL}/${p.folder}/${p.file}`;
-    paths.push({ params: { code: `VZB0${p.num}` }, props: { p, variant: 'brilho', imgPath } });
-    paths.push({ params: { code: `VZF0${p.num}` }, props: { p, variant: 'fosco', imgPath } });
+    paths.push({ params: { code: String(p.num) }, props: { p, imgPath } });
   }
   return paths;
 }
 
-const { p, variant, imgPath } = Astro.props;
+const { p, imgPath } = Astro.props;
 
-const codeB = `VZB0${p.num}`;
-const codeF = `VZF0${p.num}`;
+const codeB = p.code_b;
+const codeF = p.code_f;
 
 const SITE_URL = 'https://vizorpeliculas.com.br';
 const ogImage = imgPath;
 const productName = `${p.brand} ${p.model}${p.year ? ` (${p.year})` : ''}`;
-const variantLabel = variant === 'brilho' ? 'Brilho' : 'Fosco';
-const code = variant === 'brilho' ? codeB : codeF;
-const title = `${productName} — Película ${variantLabel} | Vizor Películas`;
-const description = `Película protetora para painel do ${productName}. Código ${code}. Fabricação nacional, acabamento ${variantLabel}.`;
-const canonicalUrl = `${SITE_URL}/produto/${code}`;
-const wppMsg = `Olá! Vi esse produto no site da Vizor Películas e tenho interesse:\n\n*${p.model}* (${p.year})\nCódigo: ${code}\n\n🔗 ${canonicalUrl}`;
+const title = `${productName} — Película Protetora | Vizor Películas`;
+const description = `Película protetora para painel do ${productName}. Códigos ${codeB} (brilho) e ${codeF} (fosco). Fabricação nacional.`;
+const canonicalUrl = `${SITE_URL}/produto/${p.num}`;
+const wppMsg = `Olá! Vi esse produto no site da Vizor Películas e tenho interesse:\n\n*${p.model}* (${p.year})\nCódigo: ${codeB}\n\n🔗 ${canonicalUrl}`;
 const wppUrl = `https://wa.me/5551980230392?text=${encodeURIComponent(wppMsg)}`;
 ---
 
@@ -212,8 +211,6 @@ const wppUrl = `https://wa.me/5551980230392?text=${encodeURIComponent(wppMsg)}`;
           <div class="card__model">{p.model}</div>
           {p.year && <div class="card__year">{p.year}</div>}
         </div>
-
-        <span class={`card__badge card__badge--${variant}`}>Acabamento {variantLabel}</span>
 
         <div class="card__codes">
           <div>

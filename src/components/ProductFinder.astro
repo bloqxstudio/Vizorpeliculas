@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase';
 
 const { data: products } = await supabase
   .from('products')
-  .select('num, brand, model, year, image_url')
+  .select('num, brand, model, year, code_b, code_f, image_url')
   .order('num');
 
 // Normaliza brand name para chave do select
@@ -12,21 +12,22 @@ function brandKey(brand: string): string {
 }
 
 // Monta catalog agrupado por marca
-const catalogMap: Record<string, { model: string; year: string; codeB: string; codeF: string }[]> = {};
+const catalogMap: Record<string, { num: number; model: string; year: string; codeB: string; codeF: string }[]> = {};
 const imgMap: Record<string, string> = {};
 const brandLabels: Record<string, string> = {};
 
 for (const p of products ?? []) {
   const key = brandKey(p.brand);
-  const codeB = `VZB0${p.num}`;
-  const codeF = `VZF0${p.num}`;
+  const codeB = p.code_b;
+  const codeF = p.code_f;
 
   if (!catalogMap[key]) {
     catalogMap[key] = [];
     brandLabels[key] = p.brand;
   }
-  catalogMap[key].push({ model: p.model, year: p.year ?? '', codeB, codeF });
-  if (p.image_url) imgMap[codeB] = p.image_url;
+  catalogMap[key].push({ num: p.num, model: p.model, year: p.year ?? '', codeB, codeF });
+  // imgMap é chaveado por num (o código se repete entre motos).
+  if (p.image_url) imgMap[p.num] = p.image_url;
 }
 
 const brandsOrdered = Object.keys(catalogMap).sort((a, b) =>
@@ -673,8 +674,8 @@ const labelsJSON  = JSON.stringify(brandLabels);
       <div class="finder__result-title"></div>
       <div style="display:flex;flex-direction:column;gap:12px;margin-top:16px;">
         ${results.map(r => {
-          const imgSrc = imgMap[r.codeB] || '';
-          const productUrl = `https://vizorpeliculas.com.br/produto/${r.codeB}`;
+          const imgSrc = imgMap[r.num] || '';
+          const productUrl = `https://vizorpeliculas.com.br/produto/${r.num}`;
           const wppMsg = `Olá! Vi esse produto no site da Vizor Películas e tenho interesse:\n\n*${r.model}* (${r.year})\nCódigo: ${r.codeB}\n\n🔗 ${productUrl}`;
           const wppUrl = `https://wa.me/5551980230392?text=${encodeURIComponent(wppMsg)}`;
           return `
