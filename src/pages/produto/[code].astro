@@ -5,7 +5,7 @@ export async function getStaticPaths() {
   const { data } = await supabase.from('products').select('num, brand, model, year, code_b, code_f, folder, file, image_url');
   if (!data) return [];
 
-  const BUCKET_URL = 'https://bbrxcoxuzulieywudotl.supabase.co/storage/v1/object/public/products-images';
+  const BUCKET_URL = 'https://bbrxcoxuzulieywudotl.supabase.co/storage/v1/object/public/produtos';
 
   // Uma rota por MOTO (identificada pelo num). O código se repete entre motos
   // compatíveis, então não pode ser o parâmetro da rota — usamos num.
