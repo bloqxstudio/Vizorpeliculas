@@ -1,46 +1,23 @@
 ---
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
-
-// BrandGrid — Grade de marcas atendidas
+// BrandGrid — Grade de marcas atendidas (logos oficiais coloridos)
 const brands = [
-  { id: 'bajaj',         name: 'Bajaj',          count: 7,  color: '#E84B1A', logo: 'bajaj.svg',        logoBg: '#fff' },
-  { id: 'bmw',           name: 'BMW',             count: 17, color: '#1C69D4', logo: 'bmw.svg',          logoBg: '#fff' },
-  { id: 'dafra',         name: 'Dafra',           count: 4,  color: '#D4181B', logo: 'dafra.svg',        logoBg: '#fff' },
-  { id: 'ducati',        name: 'Ducati',          count: 6,  color: '#CC0000', logo: 'ducati.svg',       logoBg: '#fff' },
-  { id: 'haojue',        name: 'Haojue',          count: 4,  color: '#005BAC', logo: 'haojue.svg',       logoBg: '#fff' },
-  { id: 'harley',        name: 'Harley-Davidson', count: 4,  color: '#FF6600', logo: 'harley.svg',       logoBg: '#fff' },
-  { id: 'honda',         name: 'Honda',           count: 35, color: '#CC0000', logo: 'honda.svg',        logoBg: '#fff' },
-  { id: 'kawasaki',      name: 'Kawasaki',        count: 24, color: '#1a1a1a', logo: 'kawasaki.svg',     logoBg: '#fff' },
-  { id: 'ktm',           name: 'KTM',             count: 5,  color: '#FF6600', logo: 'ktm.svg',          logoBg: '#1a1a1a' },
-  { id: 'royal_enfield', name: 'Royal Enfield',   count: 11, color: '#8B1A1A', logo: 'royalenfield.svg', logoBg: '#fff' },
-  { id: 'shineray',      name: 'Shineray',        count: 7,  color: '#003087', logo: 'shineray.svg',     logoBg: '#fff' },
-  { id: 'suzuki',        name: 'Suzuki',          count: 12, color: '#0047AB', logo: 'suzuki.svg',       logoBg: '#fff' },
-  { id: 'triumph',       name: 'Triumph',         count: 18, color: '#0066CC', logo: 'triumph.svg',      logoBg: '#fff' },
-  { id: 'voltz',         name: 'Voltz',           count: 2,  color: '#2ECC71', logo: 'voltz.svg',        logoBg: '#fff' },
-  { id: 'yamaha',        name: 'Yamaha',          count: 38, color: '#0E1C96', logo: 'yamaha.svg',       logoBg: '#fff' },
-  { id: 'zontes',        name: 'Zontes',          count: 3,  color: '#E30613', logo: 'zontes.svg',       logoBg: '#fff' },
+  { id: 'bajaj',         name: 'Bajaj',          count: 7,  color: '#0A3D91', logo: 'bajaj.png' },
+  { id: 'bmw',           name: 'BMW',             count: 17, color: '#1C69D4', logo: 'bmw.png' },
+  { id: 'dafra',         name: 'Dafra',           count: 4,  color: '#0A3D91', logo: 'dafra.png' },
+  { id: 'ducati',        name: 'Ducati',          count: 6,  color: '#CC0000', logo: 'ducati.png' },
+  { id: 'haojue',        name: 'Haojue',          count: 4,  color: '#005BAC', logo: 'haojue.png' },
+  { id: 'harley',        name: 'Harley-Davidson', count: 4,  color: '#1a1a1a', logo: 'harley.png' },
+  { id: 'honda',         name: 'Honda',           count: 35, color: '#CC0000', logo: 'honda.png' },
+  { id: 'kawasaki',      name: 'Kawasaki',        count: 24, color: '#1a1a1a', logo: 'kawasaki.png' },
+  { id: 'ktm',           name: 'KTM',             count: 5,  color: '#FF6600', logo: 'ktm.png' },
+  { id: 'royal_enfield', name: 'Royal Enfield',   count: 11, color: '#8B1A1A', logo: 'royalenfield.png' },
+  { id: 'shineray',      name: 'Shineray',        count: 7,  color: '#D4181B', logo: 'shineray.png' },
+  { id: 'suzuki',        name: 'Suzuki',          count: 12, color: '#0047AB', logo: 'suzuki.png' },
+  { id: 'triumph',       name: 'Triumph',         count: 18, color: '#1a1a1a', logo: 'triumph.png' },
+  { id: 'voltz',         name: 'Voltz',           count: 2,  color: '#1a1a1a', logo: 'voltz.png' },
+  { id: 'yamaha',        name: 'Yamaha',          count: 38, color: '#E4002B', logo: 'yamaha.png' },
+  { id: 'zontes',        name: 'Zontes',          count: 3,  color: '#1a1a1a', logo: 'zontes.png' },
 ];
-
-// Lê e injeta cada SVG inline, aplicando a cor da marca no fill
-function getInlineSvg(filename: string, color: string): string {
-  try {
-    const filePath = resolve('public/logos', filename);
-    let svg = readFileSync(filePath, 'utf-8');
-    // Remove a tag <title> para evitar tooltip no browser
-    svg = svg.replace(/<title>[^<]*<\/title>/g, '');
-    // Injeta fill com a cor da marca no elemento <svg> raiz e no <path>
-    svg = svg.replace('<svg ', `<svg fill="${color}" `);
-    return svg;
-  } catch {
-    return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><text x="12" y="16" text-anchor="middle" font-size="8" fill="${color}">${filename.replace('.svg','').toUpperCase()}</text></svg>`;
-  }
-}
-
-const brandsWithSvg = brands.map(b => ({
-  ...b,
-  svgContent: getInlineSvg(b.logo, b.color),
-}));
 ---
 
 <section id="marcas" class="brands" aria-labelledby="brands-title">
@@ -59,7 +36,7 @@ const brandsWithSvg = brands.map(b => ({
 
     <!-- Grid -->
     <div class="brands__grid" role="list">
-      {brandsWithSvg.map((brand) => (
+      {brands.map((brand) => (
         <a
           href="#buscador"
           class="vz-brand-card brands__card"
@@ -69,10 +46,10 @@ const brandsWithSvg = brands.map(b => ({
         >
           <div
             class="brands__logo-wrap"
-            style={`--brand-color: ${brand.color}; background: ${brand.logoBg}`}
-            aria-hidden="true"
-            set:html={brand.svgContent}
-          />
+            style={`--brand-color: ${brand.color}`}
+          >
+            <img src={`/logos/${brand.logo}`} alt={`Logo ${brand.name}`} loading="lazy" decoding="async" />
+          </div>
           <span class="brands__name">{brand.name}</span>
           <span class="brands__count">{brand.count} {brand.count === 1 ? 'modelo' : 'modelos'}</span>
         </a>
@@ -134,6 +111,7 @@ const brandsWithSvg = brands.map(b => ({
     height: 64px;
     border-radius: 14px;
     border: 1.5px solid color-mix(in srgb, var(--brand-color) 22%, #e5e7eb);
+    background: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -149,10 +127,11 @@ const brandsWithSvg = brands.map(b => ({
     transform: scale(1.08);
   }
 
-  /* O SVG injetado inline */
-  .brands__logo-wrap svg {
+  /* Logo da marca (imagem) */
+  .brands__logo-wrap img {
     width: 100%;
     height: 100%;
+    object-fit: contain;
     display: block;
   }
 

@@ -1,7 +1,0 @@
-<svg role="img" viewBox="0 0 130 80" xmlns="http://www.w3.org/2000/svg"><title>Harley-Davidson</title>
-<!-- Shield shape -->
-<path d="M10 5 L120 5 L120 55 L65 75 L10 55 Z" fill="currentColor"/>
-<path d="M15 10 L115 10 L115 52 L65 70 L15 52 Z" fill="#fff"/>
-<text x="65" y="33" text-anchor="middle" font-family="'Arial Black','Arial',sans-serif" font-weight="900" font-size="14" fill="currentColor">HARLEY</text>
-<text x="65" y="52" text-anchor="middle" font-family="'Arial Black','Arial',sans-serif" font-weight="900" font-size="10" fill="currentColor">DAVIDSON</text>
-</svg>
