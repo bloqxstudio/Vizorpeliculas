@@ -395,6 +395,31 @@
 <script>
   import { supabase } from '../lib/supabase';
 
+  // Leads no CRM da Sinfy (Oportunidades), com a origem da visita. O endereço é público como
+  // o de qualquer webhook de formulário; o lead continua indo também para distributor_leads.
+  const LEAD_WEBHOOK = 'https://nfmfcpcwyavutntnrxqq.supabase.co/functions/v1/lead-webhook?key=f0b08b52ff7c49ceb2e219cfa4f6b8cfe35b1a47a1f144edaba93b7d5381f846';
+  const ORIGIN_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'utm_id', 'gclid', 'gbraid', 'wbraid', 'fbclid'];
+
+  // Primeira origem da sessão: quem chega por um anúncio e navega antes de enviar não perde a campanha
+  function origin(): Record<string, string> {
+    try {
+      const saved = sessionStorage.getItem('vz_origem');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    const params = new URLSearchParams(location.search);
+    const found: Record<string, string> = {};
+    for (const key of ORIGIN_KEYS) { const v = params.get(key); if (v) found[key] = v.slice(0, 200); }
+    if (document.referrer && !document.referrer.startsWith(location.origin)) found.referrer = document.referrer.slice(0, 300);
+    try { sessionStorage.setItem('vz_origem', JSON.stringify(found)); } catch {}
+    return found;
+  }
+  origin();
+
+  function sendToCrm(lead: Record<string, string>) {
+    const body = { form_name: 'Quero ser revendedor', ...lead, ...origin(), page_url: location.href };
+    fetch(LEAD_WEBHOOK, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), keepalive: true }).catch(() => {});
+  }
+
   const form = document.getElementById('revend-form') as HTMLFormElement;
   const successEl = document.getElementById('revend-success') as HTMLDivElement;
   const submitBtn = document.getElementById('revend-submit') as HTMLButtonElement;
@@ -430,6 +455,9 @@
       submitBtn.innerHTML = '<span>Quero ser revendedor</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
       return;
     }
+
+    sendToCrm({ nome, empresa, cidade, whatsapp });
+    (window as any).visitas?.('revendedor_enviado', { cidade });
 
     form.reset();
     submitBtn.style.display = 'none';

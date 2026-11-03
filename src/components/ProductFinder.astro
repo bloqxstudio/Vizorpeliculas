@@ -661,6 +661,7 @@ const labelsJSON  = JSON.stringify(brandLabels);
     let results = catalog[brand] || [];
     if (model) results = results.filter(p => p.model === model);
     if (year)  results = results.filter(p => p.year === year);
+    if (window.visitas) window.visitas('busca_pelicula', { marca: brand, modelo: model || '', ano: year || '', resultados: String(results.length) });
     popularEl.style.display = 'none';
     resultsEl.classList.add('visible');
 
