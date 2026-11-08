@@ -1,0 +1,111 @@
+---
+/**
+ * Página dos anúncios: o localizador de película (formulário do Superelements, conta da Vizor) embutido,
+ * sem animação de abertura nem botão flutuante, para a pessoa ir direto à moto dela. O formulário cuida do
+ * pixel da Meta, da busca e de levar ao WhatsApp com o produto.
+ */
+import Layout from '../layouts/Layout.astro';
+
+const FORM_ID = 'e1fbd607-9a96-4b6e-b53a-16884127465b';
+const TEAM_ID = 'a247fefc-2b42-4b7c-bc76-185515063c98';
+const SUPABASE = 'https://nfmfcpcwyavutntnrxqq.supabase.co';
+---
+
+<Layout
+  title="Encontre a película do seu painel"
+  description="Escolha a marca, o modelo e o ano da sua moto e veja a película compatível para o painel, em brilho ou fosco. Fabricação 100% nacional, em São Leopoldo, RS."
+  canonicalUrl="https://vizorpeliculas.com.br/encontrar-pelicula"
+  preloader={false}
+  whatsapp={false}
+>
+  <link rel="preconnect" href={SUPABASE} crossorigin />
+  <main class="lp">
+    <div class="lp__form">
+      <div
+        data-avence-form={FORM_ID}
+        data-config={`${SUPABASE}/storage/v1/object/public/crm-forms/${TEAM_ID}/${FORM_ID}.json`}
+        data-endpoint={`${SUPABASE}/functions/v1/form-submit`}
+      ></div>
+    </div>
+
+    <ul class="lp__trust" aria-label="Sobre a Vizor">
+      <li><strong>100% nacional</strong><span>Fabricada em São Leopoldo, RS</span></li>
+      <li><strong>Brilho ou fosco</strong><span>Escolha o acabamento</span></li>
+      <li><strong>Mais de 200 modelos</strong><span>De 17 marcas de moto</span></li>
+    </ul>
+
+    <footer class="lp__foot">
+      <a href="/" aria-label="Ir para o site da Vizor"><img src="/logo.svg" alt="Vizor Películas Protetoras" width="120" height="23" /></a>
+      <p>Proteção com propósito.</p>
+    </footer>
+  </main>
+  <script is:inline defer src="https://app.avencestudio.com/forms.js?v=25"></script>
+</Layout>
+
+<style>
+  .lp {
+    min-height: 100vh;
+    padding: 28px 16px 40px;
+    background:
+      radial-gradient(120% 60% at 50% 0%, var(--vz-50) 0%, transparent 70%),
+      var(--vz-off-white);
+  }
+  .lp__form {
+    max-width: 560px;
+    margin: 0 auto;
+    min-height: 620px;
+  }
+  .lp__trust {
+    list-style: none;
+    margin: 28px auto 0;
+    padding: 0;
+    max-width: 560px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .lp__trust li {
+    background: #fff;
+    border: 1px solid var(--vz-gray-100);
+    border-radius: 8px;
+    padding: 12px;
+    display: grid;
+    gap: 2px;
+  }
+  .lp__trust strong {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-style: italic;
+    text-transform: uppercase;
+    font-size: 1rem;
+    line-height: 1.1;
+    color: var(--vz-800);
+  }
+  .lp__trust span {
+    font-size: 0.82rem;
+    line-height: 1.3;
+    color: var(--vz-gray-500);
+  }
+  .lp__foot {
+    max-width: 560px;
+    margin: 32px auto 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--vz-gray-500);
+    font-size: 0.85rem;
+  }
+  .lp__foot img {
+    display: block;
+    width: 120px;
+    height: auto;
+    filter: brightness(0) saturate(100%) invert(14%) sepia(39%) saturate(1500%) hue-rotate(178deg) brightness(92%);
+  }
+  .lp__foot p { margin: 0; }
+  @media (max-width: 480px) {
+    .lp { padding: 12px 12px 32px; }
+    .lp__trust { grid-template-columns: 1fr; }
+    .lp__trust li { grid-template-columns: auto 1fr; align-items: baseline; gap: 8px; }
+  }
+</style>
